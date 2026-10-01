@@ -1,0 +1,204 @@
+{
+  "archive_sha256": "b10b637208dc5b368aee12e65d9a59b8fbc53764a152e1ab3d8e8461346cef69",
+  "files": {
+    "accounts.csv": {
+      "bytes": 32785,
+      "sha256": "9071ad50a7ef02a9400f33998ed41dd5f8131bb8b05bba0b05488fc4096bdf5b"
+    },
+    "accounts.json": {
+      "bytes": 121036,
+      "sha256": "8c3008cea687c7a1b1990051c93eb3c57a73bd28e43e967eb325cba55283e804"
+    },
+    "reviews.csv": {
+      "bytes": 4428964,
+      "sha256": "79702534ddac7e2ea32744f0ff08fc4c19374ae7c9b2cd349979a20d019003d2"
+    },
+    "reviews.json": {
+      "bytes": 11616699,
+      "sha256": "3c67a97ba0a605d225e99cacc4f4de3056371794943bca63e012eb84bc1ac8d8"
+    }
+  },
+  "csv_checks": {
+    "accounts.csv": {
+      "rows": 605,
+      "fields": [
+        "_id",
+        "is_deleted",
+        "is_private",
+        "is_real",
+        "local_guide_level",
+        "name_score",
+        "number_of_reviews"
+      ],
+      "ids_and_labels_match_json": true
+    },
+    "reviews.csv": {
+      "rows": 17979,
+      "fields": [
+        "_id",
+        "account_id",
+        "approximate_localization.lat",
+        "approximate_localization.lon",
+        "censored_text",
+        "cluster",
+        "content",
+        "content_not_full",
+        "content_translated",
+        "date",
+        "is_real",
+        "localization_missing",
+        "not_in_poland",
+        "photos_urls",
+        "rating",
+        "response_content",
+        "type_of_object"
+      ],
+      "ids_and_labels_match_json": true
+    }
+  },
+  "accounts": 605,
+  "reviews": 17979,
+  "orphan_reviews": 0,
+  "review_account_label_mismatches": 0,
+  "accounts_without_review_rows": 162,
+  "per_class": {
+    "labeled_real": {
+      "accounts": 286,
+      "reviews": 15543,
+      "ratings": {
+        "1": 390,
+        "2": 326,
+        "3": 1064,
+        "4": 3128,
+        "5": 10635
+      },
+      "empty_text": 4442,
+      "photo_field_null": 15,
+      "photo_field_nonempty": 1422,
+      "response_present": 309,
+      "flags": {
+        "content_not_full": 1436,
+        "content_translated": 794,
+        "not_in_poland": 2247,
+        "localization_missing": 117,
+        "censored_text": 82
+      },
+      "date_min": "2013-02-11T22:03:25.433Z",
+      "date_max": "2023-02-09T23:05:17.034Z",
+      "account_review_count_null": 30,
+      "account_review_count_1_or_2": 36,
+      "accounts_private": 30,
+      "accounts_deleted": 1
+    },
+    "labeled_fake": {
+      "accounts": 319,
+      "reviews": 2436,
+      "ratings": {
+        "1": 12,
+        "2": 2,
+        "3": 3,
+        "4": 18,
+        "5": 2401
+      },
+      "empty_text": 186,
+      "photo_field_null": 2436,
+      "photo_field_nonempty": 0,
+      "response_present": 347,
+      "flags": {
+        "content_not_full": 0,
+        "content_translated": 19,
+        "not_in_poland": 55,
+        "localization_missing": 0,
+        "censored_text": 82
+      },
+      "date_min": "2017-06-07T12:52:52.778Z",
+      "date_max": "2021-06-04T13:29:23.750Z",
+      "account_review_count_null": 131,
+      "account_review_count_1_or_2": 0,
+      "accounts_private": 59,
+      "accounts_deleted": 245
+    }
+  },
+  "normalized_nonempty_duplicate_groups": 287,
+  "rows_in_duplicate_groups": 2022,
+  "duplicate_groups_crossing_accounts": 143,
+  "duplicate_groups_crossing_labels": 12,
+  "cluster_counts_by_label": {
+    "Automotive": {
+      "labeled_real": 447,
+      "labeled_fake": 133
+    },
+    "Constructions": {
+      "labeled_real": 277,
+      "labeled_fake": 195
+    },
+    "Education": {
+      "labeled_real": 62,
+      "labeled_fake": 40
+    },
+    "Gastronomy": {
+      "labeled_real": 3242,
+      "labeled_fake": 238
+    },
+    "Institutions": {
+      "labeled_real": 498,
+      "labeled_fake": 4
+    },
+    "Legal": {
+      "labeled_real": 49,
+      "labeled_fake": 122
+    },
+    "Leisure": {
+      "labeled_real": 1998,
+      "labeled_fake": 130
+    },
+    "Lodging": {
+      "labeled_real": 1799,
+      "labeled_fake": 103
+    },
+    "Medical": {
+      "labeled_real": 246,
+      "labeled_fake": 191
+    },
+    "Nature": {
+      "labeled_real": 495,
+      "labeled_fake": 37
+    },
+    "Other": {
+      "labeled_real": 8,
+      "labeled_fake": 50
+    },
+    "Other services": {
+      "labeled_real": 759,
+      "labeled_fake": 505
+    },
+    "Repairs": {
+      "labeled_real": 236,
+      "labeled_fake": 128
+    },
+    "Sacral and Monuments": {
+      "labeled_real": 999,
+      "labeled_fake": 37
+    },
+    "Shops": {
+      "labeled_real": 3201,
+      "labeled_fake": 305
+    },
+    "Suppliers": {
+      "labeled_real": 190,
+      "labeled_fake": 162
+    },
+    "Transport": {
+      "labeled_real": 1037,
+      "labeled_fake": 56
+    }
+  },
+  "photo_null_rule_agreement_with_fake_label": 0.9991656933088603,
+  "business_identity_available": false,
+  "limits": [
+    "Labels are inherited account judgments, not verified experience truth.",
+    "No business identifier is exposed in the released schema.",
+    "CSV/JSON equivalence checked for rows, ordered IDs and labels only.",
+    "No semantic similarity, model evaluation or India-clinic validation performed."
+  ]
+}

@@ -42,8 +42,9 @@ export default function MapsComparison() {
   const [starting, setStarting] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const port = useRef<ReturnType<typeof browser.runtime.connect> | null>(null);
-  useEffect(() => {
-    if (!installed) return;
+  const startup = useRef(0);
+  function connectPanel() {
+    if (port.current) return port.current;
     const connection = browser.runtime.connect({ name: 'careunfold:panel' });
     port.current = connection;
     connection.onMessage.addListener(message => {
@@ -62,24 +63,38 @@ export default function MapsComparison() {
       else if (message?.kind === 'stopped') { setStarting(false); setActive(false); setStatus(message.message); }
       else if (message?.kind === 'problem') { setStarting(false); setActive(false); setError(message.message); }
     });
-    connection.onDisconnect.addListener(() => { port.current = null; setStarting(false); setActive(false); setStatus('The extension session disconnected. Reopen this panel to reconnect.'); });
-    return () => { port.current = null; connection.disconnect(); };
+    connection.onDisconnect.addListener(() => {
+      if (port.current !== connection) return;
+      startup.current++;
+      port.current = null; setStarting(false); setActive(false); setStatus('The extension session disconnected. Enable a new session to reconnect.');
+    });
+    return connection;
+  }
+  useEffect(() => {
+    if (!installed) return;
+    connectPanel();
+    return () => { startup.current++; const connection = port.current; port.current = null; connection?.disconnect(); };
   }, [installed]);
 
   async function start() {
     setError('');
     if (!installed) { setError('Live Maps sessions need the installed extension. This browser preview can show the interface only.'); return; }
-    if (!depth || !port.current) return;
+    if (!depth) return;
+    const attempt = ++startup.current;
     setStarting(true);
     try {
+      const connection = connectPanel();
       // Request from this button's user gesture, before other asynchronous work.
-      if (!await browser.permissions.request({ origins: [MAPS_SITE] })) throw new Error('Site access was declined. Enable it to read your Maps search.');
+      const allowed = await browser.permissions.request({ origins: [MAPS_SITE] });
+      if (attempt !== startup.current) return;
+      if (!allowed) throw new Error('Site access was declined. Enable it to read your Maps search.');
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (attempt !== startup.current) return;
       if (tab?.id === undefined || !isMapsPage(tab.url ?? '')) throw new Error('Open a Google Maps search tab, then enable this session there.');
-      port.current?.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER });
-    } catch (failure) { setStarting(false); setError(failure instanceof Error ? failure.message : 'Maps could not start.'); }
+      connection.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER });
+    } catch (failure) { if (attempt === startup.current) { setStarting(false); setError(failure instanceof Error ? failure.message : 'Maps could not start.'); } }
   }
-  function stop() { port.current?.postMessage({ kind: 'stop' }); setActive(false); setStarting(false); }
+  function stop() { startup.current++; port.current?.postMessage({ kind: 'stop' }); setActive(false); setStarting(false); }
   return <section className="maps-comparison" aria-labelledby="maps-title">
     <h1 id="maps-title">Compare loaded doctors</h1>
     <p className="boundary">Google’s listing rating and your captured sample are different measures. The adjustment checks exact repeated wording; it cannot establish genuine reviews or medical competence.</p>

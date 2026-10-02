@@ -4,7 +4,7 @@ Checked 1 October 2026. Scope: author/publisher sources outside Kaggle. No raw r
 
 ## Decision
 
-The clearest accessible candidate found is **Asiri and Alotaibi's Deceptive Reviews Dataset v2**, published on Mendeley Data. Use it only for exploratory text experiments after inspecting its labeling protocol and schema. It does **not** provide independent proof of review fraud, Indian clinic coverage, or clearance for a production Google Maps extension. Its authors explicitly describe labels derived from deception indicators. [Dataset](https://data.mendeley.com/datasets/y2s4973hsg/2)
+The original workbook for **Asiri and Alotaibi's Deceptive Reviews Dataset v2** has now been downloaded and inspected. Its 21,476 labels are nearly recoverable from the authors' deception-indicator rule (99.72% agreement without training). It does **not** provide independent proof of review fraud, Indian clinic coverage, or clearance for a production Google Maps extension. Reject it as independent authenticity ground truth; retain only for exploratory heuristic auditing. [Completed inspection](mendeley-inspection.md), [dataset](https://data.mendeley.com/datasets/y2s4973hsg/2).
 
 For behavioral experiments, the original **YelpNYC** dataset is more structurally suitable, but its current author page requires email access and displays no data-specific license. Acquisition and commercial-use permission remain unresolved. [Author page](https://shebuti.com/yelpnyc-dataset/)
 
@@ -12,7 +12,7 @@ For behavioral experiments, the original **YelpNYC** dataset is more structurall
 
 | Dataset | Labels and fields | Access and rights | Fit for this product |
 |---|---|---|---|
-| Asiri/Alotaibi, Mendeley v2 (2025) | English Google Maps restaurant reviews from New York; predefined deception-indicator labels. Search-indexed repository metadata lists `reviews_dataset.xlsx`, 2.85 MB. Exact row count and user/business/date columns remain unverified. | Author-published repository declares **CC BY 4.0**; file listing verified through the repository's [version comparison](https://data.mendeley.com/datasets/compare/y2s4973hsg). | Exploratory text benchmark only; could reward the same writing-style assumptions we need to test. No clinical or India validation. |
+| Asiri/Alotaibi, Mendeley v2 (2025) | Inspected workbook: 21,476 rows; text, 11 derived features and label. No business/reviewer IDs, dates or stars. Labels derive from deception indicators; 49 normalized text groups span both labels. | Author-published repository declares **CC BY 4.0**; original anonymous download and hash verified. Underlying review rights remain unresolved. [Inspection](mendeley-inspection.md). | Heuristic audit only. No independent fabrication labels, clinical or India validation. |
 | YelpCHI | 67,395 reviews; 38,063 reviewers; 201 Chicago hotels/restaurants. User/business information, timestamp, rating, text. Labels mean recommended versus filtered. | Current author page says obtain labeled data by email. No public dataset license observed. | Smallest useful historical behavioral benchmark; proxy-label limitations apply. [Source](https://shebuti.com/yelpchi-dataset/) |
 | YelpNYC | 359,052 reviews; 160,225 reviewers; 923 NYC restaurants. Same metadata/text fields and recommendation-status labels. | Email acquisition; no public dataset license observed. | Strong structural match for reviewer overlap, timing, and text evidence; wrong platform/domain/geography. [Source](https://shebuti.com/yelpnyc-dataset/) |
 | YelpZip | 608,598 reviews; 260,277 reviewers; 5,044 US restaurants. Same metadata/text fields and proxy labels. | Email acquisition; no public dataset license observed. | Adds scale rather than better fraud truth; unnecessary first acquisition. [Source](https://shebuti.com/yelpzip-dataset/) |
@@ -28,4 +28,4 @@ For behavioral experiments, the original **YelpNYC** dataset is more structurall
 
 ## Next work
 
-Inspect the Mendeley workbook's schema and accompanying labeling instructions under its declared license; measure text duplication and label distribution without treating its labels as fact. Require clinic-specific independent evaluation before exposing fraud judgments. None of these datasets resolves production review access.
+Mendeley schema, counts, duplication, label distribution and rule reconstruction are now inspected. Neither this workbook nor the inspected GMR-PL release supplies independent Indian-clinic fraud labels. Obtain independently justified target-domain evidence before evaluating a suspicion detector or exposing penalties. None of these datasets resolves production review access.

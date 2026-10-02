@@ -6,7 +6,7 @@ Evidence behind care decisions. A local-first desktop browser-extension prototyp
 
 Import a JSON review sample, compare its original average with an exact-wording adjustment, toggle the adjustment and inspect every affected entry. Each matching group contributes its mean stars as one vote. Other reviews keep one vote. The built-in example is entirely synthetic.
 
-**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. Automatic local Maps comparison controls are implemented; successful collection in an installed extension remains unverified.
+**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. Signed-in installed Edge 0.2.3 testing captured multiple real listings, including 100-review samples; some listings stalled earlier. The 0.2.4 long-review traversal fix passes regression checks and still needs an installed live retest. See [the installed test record](research/edge-panel-verification.md) for scope and limitations.
 
 ## Run and install
 
@@ -20,6 +20,14 @@ npm run build
 ```
 
 Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose **Load unpacked** and select `.output/chrome-mv3`. Click the extension's toolbar action to open its side panel. `npm run zip` creates a distribution ZIP in `.output`; marketplace publishing is a separate step.
+
+To update an existing unpacked installation:
+
+1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.4).
+3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
+
+For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.
 
 `npm run dev` starts WXT without launching a browser. Load `.output/chrome-mv3-dev` manually for extension development. To preview production UI without installing the extension, serve `.output/chrome-mv3` locally and open `sidepanel.html`. This preview does not test extension installation or the toolbar action.
 
@@ -54,7 +62,7 @@ Matching uses NFKC Unicode normalization, lowercase and collapsed whitespace. On
 
 Processing runs locally. Imports stay in memory; reloading restores the demo. No backend, telemetry, uploads or review persistence. Review text is rendered as text.
 
-For Maps comparison, open a Google Maps search, open CareUnfold, select **Google Maps**, choose the review depth and select **Enable on this Maps tab**. Grant the requested site access. It watches only already-loaded search cards and reuses one temporary inactive tab sequentially to attempt their reviews; it never scrolls search results. Review depth starts blank. The 100-newest choice is an engineering limit, not a representative sample; attempt-all still stops on a stall or a 90-second collection deadline. Unavailable evidence produces no adjusted rating. The manifest declares `sidePanel`, `scripting` and optional `https://www.google.com/maps/*` host access; site access is not granted automatically. Chrome host grants apply at origin level, while this code checks for Google Maps paths. No all-site, storage, debugger or network-interception permission is requested. Use **Stop** to end collection. Closing the panel or source tab, changing to Demo / import, or revoking site access also ends the session. Reconnect after a source-page reload. Activating the temporary tab hands it over to you and stops the batch. Native integration and real review coverage remain unverified.
+For Maps comparison, open a Google Maps search, open CareUnfold, select **Google Maps**, choose the review depth and select **Enable on this Maps tab**. Grant the requested site access. It watches only already-loaded search cards and reuses one temporary inactive tab sequentially to attempt their reviews; it never scrolls search results. Review depth starts blank. The 100-newest choice is an engineering limit, not a representative sample; attempt-all still stops on a stall or a 90-second collection deadline. Unavailable evidence produces no adjusted rating. The manifest declares `sidePanel`, `scripting` and optional `https://www.google.com/maps/*` host access; site access is not granted automatically. Chrome host grants apply at origin level, while this code checks for Google Maps paths. No all-site, storage, debugger or network-interception permission is requested. Use **Stop** to end collection. Closing the panel or source tab, changing to Demo / import, or revoking site access also ends the session. Reconnect after a source-page reload. Activating the temporary tab hands it over to you and stops the batch. Native collection has partial verification; complete review coverage and unattended background reliability remain unverified.
 
 Read [the feasibility investigation](research/feasibility.md), [dataset audit](research/dataset-audit.md), and [GMR–PL inspection](research/gmr-inspection.md) before changing data acquisition or scoring. Raw downloaded data and generated builds are excluded from Git. No third-party dataset is redistributed here.
 

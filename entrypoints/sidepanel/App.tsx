@@ -92,7 +92,7 @@ export default function App() {
           <div className="section-heading"><h2 id="evidence-title">Inspect the evidence</h2><span>{result.wordingGroups} wording {result.wordingGroups === 1 ? 'group' : 'groups'}</span></div>
           {!result.findings.length && <div className="no-pattern"><strong>No patterns met these rules.</strong><p>{dataset.reviews.length ? 'The adjusted average equals the original. This does not establish that the reviews are genuine.' : 'Import at least one rated review to calculate a sample average.'}</p></div>}
           {result.findings.map(f => <details key={`${f.kind}:${f.ids.join(',')}`} className="finding">
-            <summary><span className={`finding-kind ${f.kind}`}>{f.kind === 'wording' ? 'Wording' : 'Dates'}</span><strong>{f.title}</strong><svg aria-hidden="true" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" /></svg></summary>
+            <summary><strong>{f.kind === 'wording' ? 'Wording' : 'Dates'}: {f.title}</strong><svg aria-hidden="true" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" /></svg></summary>
             <div className="finding-body"><p>{f.explanation}</p>
               <p className="effect">{f.kind === 'wording' ? combine ? `Combined weight: 1 vote. The group’s mean star rating contributes to the adjusted average.` : 'Adjustment is off. These entries each have one vote.' : 'Context only. This date pattern does not change the rating.'}</p>
               <ul className="review-list">{f.ids.map(id => { const r = dataset.reviews.find(r => r.id === id)!; return <ReviewEntry key={id} review={r} weight={f.kind === 'wording' && combine ? 1 / f.ids.length : 1} />; })}</ul>

@@ -1,0 +1,557 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-02T03:42:11.238479+00:00",
+  "title": "Design System: CareUnfold",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.05468 255.58)",
+          "oklch(26% 0.05468 255.58)",
+          "oklch(38% 0.05468 255.58)",
+          "oklch(49% 0.05468 255.58)",
+          "oklch(61% 0.05468 255.58)",
+          "oklch(72% 0.05468 255.58)",
+          "oklch(84% 0.05468 255.58)",
+          "oklch(95% 0.05468 255.58)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.04299 254.74)",
+          "oklch(26% 0.04299 254.74)",
+          "oklch(38% 0.04299 254.74)",
+          "oklch(49% 0.04299 254.74)",
+          "oklch(61% 0.04299 254.74)",
+          "oklch(72% 0.04299 254.74)",
+          "oklch(84% 0.04299 254.74)",
+          "oklch(95% 0.04299 254.74)"
+        ]
+      },
+      "blue": {
+        "role": "primary",
+        "displayName": "Blue",
+        "tonalRamp": [
+          "oklch(15% 0.17902 261.45)",
+          "oklch(26% 0.17902 261.45)",
+          "oklch(38% 0.17902 261.45)",
+          "oklch(49% 0.17902 261.45)",
+          "oklch(61% 0.17902 261.45)",
+          "oklch(72% 0.17902 261.45)",
+          "oklch(84% 0.17902 261.45)",
+          "oklch(95% 0.17902 261.45)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.01734 256.28)",
+          "oklch(26% 0.01734 256.28)",
+          "oklch(38% 0.01734 256.28)",
+          "oklch(49% 0.01734 256.28)",
+          "oklch(61% 0.01734 256.28)",
+          "oklch(72% 0.01734 256.28)",
+          "oklch(84% 0.01734 256.28)",
+          "oklch(95% 0.01734 256.28)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0.00000 89.88)",
+          "oklch(26% 0.00000 89.88)",
+          "oklch(38% 0.00000 89.88)",
+          "oklch(49% 0.00000 89.88)",
+          "oklch(61% 0.00000 89.88)",
+          "oklch(72% 0.00000 89.88)",
+          "oklch(84% 0.00000 89.88)",
+          "oklch(95% 0.00000 89.88)"
+        ]
+      },
+      "tint": {
+        "role": "primary",
+        "displayName": "Tint",
+        "tonalRamp": [
+          "oklch(15% 0.01733 264.49)",
+          "oklch(26% 0.01733 264.49)",
+          "oklch(38% 0.01733 264.49)",
+          "oklch(49% 0.01733 264.49)",
+          "oklch(61% 0.01733 264.49)",
+          "oklch(72% 0.01733 264.49)",
+          "oklch(84% 0.01733 264.49)",
+          "oklch(95% 0.01733 264.49)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus",
+        "tonalRamp": [
+          "oklch(15% 0.15780 261.09)",
+          "oklch(26% 0.15780 261.09)",
+          "oklch(38% 0.15780 261.09)",
+          "oklch(49% 0.15780 261.09)",
+          "oklch(61% 0.15780 261.09)",
+          "oklch(72% 0.15780 261.09)",
+          "oklch(84% 0.15780 261.09)",
+          "oklch(95% 0.15780 261.09)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.00624 255.48)",
+          "oklch(26% 0.00624 255.48)",
+          "oklch(38% 0.00624 255.48)",
+          "oklch(49% 0.00624 255.48)",
+          "oklch(61% 0.00624 255.48)",
+          "oklch(72% 0.00624 255.48)",
+          "oklch(84% 0.00624 255.48)",
+          "oklch(95% 0.00624 255.48)"
+        ]
+      },
+      "button-hover": {
+        "role": "neutral",
+        "displayName": "Button Hover",
+        "tonalRamp": [
+          "oklch(15% 0.01373 258.35)",
+          "oklch(26% 0.01373 258.35)",
+          "oklch(38% 0.01373 258.35)",
+          "oklch(49% 0.01373 258.35)",
+          "oklch(61% 0.01373 258.35)",
+          "oklch(72% 0.01373 258.35)",
+          "oklch(84% 0.01373 258.35)",
+          "oklch(95% 0.01373 258.35)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.15145 261.65)",
+          "oklch(26% 0.15145 261.65)",
+          "oklch(38% 0.15145 261.65)",
+          "oklch(49% 0.15145 261.65)",
+          "oklch(61% 0.15145 261.65)",
+          "oklch(72% 0.15145 261.65)",
+          "oklch(84% 0.15145 261.65)",
+          "oklch(95% 0.15145 261.65)"
+        ]
+      },
+      "source-surface": {
+        "role": "neutral",
+        "displayName": "Source Surface",
+        "tonalRamp": [
+          "oklch(15% 0.00625 255.48)",
+          "oklch(26% 0.00625 255.48)",
+          "oklch(38% 0.00625 255.48)",
+          "oklch(49% 0.00625 255.48)",
+          "oklch(61% 0.00625 255.48)",
+          "oklch(72% 0.00625 255.48)",
+          "oklch(84% 0.00625 255.48)",
+          "oklch(95% 0.00625 255.48)"
+        ]
+      },
+      "source-text": {
+        "role": "neutral",
+        "displayName": "Source Text",
+        "tonalRamp": [
+          "oklch(15% 0.05172 254.98)",
+          "oklch(26% 0.05172 254.98)",
+          "oklch(38% 0.05172 254.98)",
+          "oklch(49% 0.05172 254.98)",
+          "oklch(61% 0.05172 254.98)",
+          "oklch(72% 0.05172 254.98)",
+          "oklch(84% 0.05172 254.98)",
+          "oklch(95% 0.05172 254.98)"
+        ]
+      },
+      "synthetic-surface": {
+        "role": "neutral",
+        "displayName": "Synthetic Surface",
+        "tonalRamp": [
+          "oklch(15% 0.03722 88.46)",
+          "oklch(26% 0.03722 88.46)",
+          "oklch(38% 0.03722 88.46)",
+          "oklch(49% 0.03722 88.46)",
+          "oklch(61% 0.03722 88.46)",
+          "oklch(72% 0.03722 88.46)",
+          "oklch(84% 0.03722 88.46)",
+          "oklch(95% 0.03722 88.46)"
+        ]
+      },
+      "synthetic-text": {
+        "role": "neutral",
+        "displayName": "Synthetic Text",
+        "tonalRamp": [
+          "oklch(15% 0.08219 78.51)",
+          "oklch(26% 0.08219 78.51)",
+          "oklch(38% 0.08219 78.51)",
+          "oklch(49% 0.08219 78.51)",
+          "oklch(61% 0.08219 78.51)",
+          "oklch(72% 0.08219 78.51)",
+          "oklch(84% 0.08219 78.51)",
+          "oklch(95% 0.08219 78.51)"
+        ]
+      },
+      "synthetic-title": {
+        "role": "neutral",
+        "displayName": "Synthetic Title",
+        "tonalRamp": [
+          "oklch(15% 0.08055 76.82)",
+          "oklch(26% 0.08055 76.82)",
+          "oklch(38% 0.08055 76.82)",
+          "oklch(49% 0.08055 76.82)",
+          "oklch(61% 0.08055 76.82)",
+          "oklch(72% 0.08055 76.82)",
+          "oklch(84% 0.08055 76.82)",
+          "oklch(95% 0.08055 76.82)"
+        ]
+      },
+      "rating-ink": {
+        "role": "primary",
+        "displayName": "Rating Ink",
+        "tonalRamp": [
+          "oklch(15% 0.12203 259.90)",
+          "oklch(26% 0.12203 259.90)",
+          "oklch(38% 0.12203 259.90)",
+          "oklch(49% 0.12203 259.90)",
+          "oklch(61% 0.12203 259.90)",
+          "oklch(72% 0.12203 259.90)",
+          "oklch(84% 0.12203 259.90)",
+          "oklch(95% 0.12203 259.90)"
+        ]
+      },
+      "rating-divider": {
+        "role": "neutral",
+        "displayName": "Rating Divider",
+        "tonalRamp": [
+          "oklch(15% 0.04770 261.34)",
+          "oklch(26% 0.04770 261.34)",
+          "oklch(38% 0.04770 261.34)",
+          "oklch(49% 0.04770 261.34)",
+          "oklch(61% 0.04770 261.34)",
+          "oklch(72% 0.04770 261.34)",
+          "oklch(84% 0.04770 261.34)",
+          "oklch(95% 0.04770 261.34)"
+        ]
+      },
+      "original-ink": {
+        "role": "neutral",
+        "displayName": "Original Ink",
+        "tonalRamp": [
+          "oklch(15% 0.07579 257.81)",
+          "oklch(26% 0.07579 257.81)",
+          "oklch(38% 0.07579 257.81)",
+          "oklch(49% 0.07579 257.81)",
+          "oklch(61% 0.07579 257.81)",
+          "oklch(72% 0.07579 257.81)",
+          "oklch(84% 0.07579 257.81)",
+          "oklch(95% 0.07579 257.81)"
+        ]
+      },
+      "caption-ink": {
+        "role": "neutral",
+        "displayName": "Caption Ink",
+        "tonalRamp": [
+          "oklch(15% 0.08100 255.56)",
+          "oklch(26% 0.08100 255.56)",
+          "oklch(38% 0.08100 255.56)",
+          "oklch(49% 0.08100 255.56)",
+          "oklch(61% 0.08100 255.56)",
+          "oklch(72% 0.08100 255.56)",
+          "oklch(84% 0.08100 255.56)",
+          "oklch(95% 0.08100 255.56)"
+        ]
+      },
+      "boundary-ink": {
+        "role": "neutral",
+        "displayName": "Boundary Ink",
+        "tonalRamp": [
+          "oklch(15% 0.04563 255.76)",
+          "oklch(26% 0.04563 255.76)",
+          "oklch(38% 0.04563 255.76)",
+          "oklch(49% 0.04563 255.76)",
+          "oklch(61% 0.04563 255.76)",
+          "oklch(72% 0.04563 255.76)",
+          "oklch(84% 0.04563 255.76)",
+          "oklch(95% 0.04563 255.76)"
+        ]
+      },
+      "effect-ink": {
+        "role": "neutral",
+        "displayName": "Effect Ink",
+        "tonalRamp": [
+          "oklch(15% 0.12342 259.52)",
+          "oklch(26% 0.12342 259.52)",
+          "oklch(38% 0.12342 259.52)",
+          "oklch(49% 0.12342 259.52)",
+          "oklch(61% 0.12342 259.52)",
+          "oklch(72% 0.12342 259.52)",
+          "oklch(84% 0.12342 259.52)",
+          "oklch(95% 0.12342 259.52)"
+        ]
+      },
+      "effect-surface": {
+        "role": "neutral",
+        "displayName": "Effect Surface",
+        "tonalRamp": [
+          "oklch(15% 0.01276 266.70)",
+          "oklch(26% 0.01276 266.70)",
+          "oklch(38% 0.01276 266.70)",
+          "oklch(49% 0.01276 266.70)",
+          "oklch(61% 0.01276 266.70)",
+          "oklch(72% 0.01276 266.70)",
+          "oklch(84% 0.01276 266.70)",
+          "oklch(95% 0.01276 266.70)"
+        ]
+      },
+      "error-surface": {
+        "role": "neutral",
+        "displayName": "Error Surface",
+        "tonalRamp": [
+          "oklch(15% 0.01522 22.39)",
+          "oklch(26% 0.01522 22.39)",
+          "oklch(38% 0.01522 22.39)",
+          "oklch(49% 0.01522 22.39)",
+          "oklch(61% 0.01522 22.39)",
+          "oklch(72% 0.01522 22.39)",
+          "oklch(84% 0.01522 22.39)",
+          "oklch(95% 0.01522 22.39)"
+        ]
+      },
+      "error-ink": {
+        "role": "neutral",
+        "displayName": "Error Ink",
+        "tonalRamp": [
+          "oklch(15% 0.13238 26.65)",
+          "oklch(26% 0.13238 26.65)",
+          "oklch(38% 0.13238 26.65)",
+          "oklch(49% 0.13238 26.65)",
+          "oklch(61% 0.13238 26.65)",
+          "oklch(72% 0.13238 26.65)",
+          "oklch(84% 0.13238 26.65)",
+          "oklch(95% 0.13238 26.65)"
+        ]
+      },
+      "error-line": {
+        "role": "neutral",
+        "displayName": "Error Line",
+        "tonalRamp": [
+          "oklch(15% 0.04538 23.28)",
+          "oklch(26% 0.04538 23.28)",
+          "oklch(38% 0.04538 23.28)",
+          "oklch(49% 0.04538 23.28)",
+          "oklch(61% 0.04538 23.28)",
+          "oklch(72% 0.04538 23.28)",
+          "oklch(84% 0.04538 23.28)",
+          "oklch(95% 0.04538 23.28)"
+        ]
+      },
+      "selection-surface": {
+        "role": "neutral",
+        "displayName": "Selection Surface",
+        "tonalRamp": [
+          "oklch(15% 0.05786 264.69)",
+          "oklch(26% 0.05786 264.69)",
+          "oklch(38% 0.05786 264.69)",
+          "oklch(49% 0.05786 264.69)",
+          "oklch(61% 0.05786 264.69)",
+          "oklch(72% 0.05786 264.69)",
+          "oklch(84% 0.05786 264.69)",
+          "oklch(95% 0.05786 264.69)"
+        ]
+      },
+      "selection-ink": {
+        "role": "neutral",
+        "displayName": "Selection Ink",
+        "tonalRamp": [
+          "oklch(15% 0.09245 260.43)",
+          "oklch(26% 0.09245 260.43)",
+          "oklch(38% 0.09245 260.43)",
+          "oklch(49% 0.09245 260.43)",
+          "oklch(61% 0.09245 260.43)",
+          "oklch(72% 0.09245 260.43)",
+          "oklch(84% 0.09245 260.43)",
+          "oklch(95% 0.09245 260.43)"
+        ]
+      },
+      "scrollbar": {
+        "role": "neutral",
+        "displayName": "Scrollbar",
+        "tonalRamp": [
+          "oklch(15% 0.03382 258.37)",
+          "oklch(26% 0.03382 258.37)",
+          "oklch(38% 0.03382 258.37)",
+          "oklch(49% 0.03382 258.37)",
+          "oklch(61% 0.03382 258.37)",
+          "oklch(72% 0.03382 258.37)",
+          "oklch(84% 0.03382 258.37)",
+          "oklch(95% 0.03382 258.37)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading review evidence."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Clinic and empty-state heading."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Evidence section heading."
+      },
+      "rating": {
+        "displayName": "Rating",
+        "purpose": "Leading adjusted sample number."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Coverage and supporting context."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Operative extension navigation."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "disclosure-chevron",
+        "value": "transform .18s ease-out",
+        "purpose": "Finding chevron rotation; disabled under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow-panel",
+        "value": "360px"
+      },
+      {
+        "name": "wide-shell",
+        "value": "650px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary import action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Full-width import action in the empty state.",
+      "html": "<button class=\"ds-control ds-primary\">Import a JSON sample</button>",
+      "css": ".ds-control{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;cursor:pointer;border:1px solid var(--line,#d8e0eb);border-radius:6px;padding:9px 13px;background:var(--paper,#fff);color:var(--ink,#172b45);font-weight:600;min-height:40px}.ds-control:hover{background:#e8eef7}.ds-control:disabled{opacity:.6;cursor:wait}.ds-control:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-primary{background:var(--blue,#154fba);border-color:var(--blue,#154fba);color:white}.ds-primary:hover{background:#103e95}"
+    },
+    {
+      "name": "Compact import action",
+      "kind": "button",
+      "refersTo": "button-primary-small",
+      "description": "Toolbar import action.",
+      "html": "<button class=\"ds-control ds-primary ds-small\">Import JSON</button>",
+      "css": ".ds-control{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;cursor:pointer;border:1px solid var(--line,#d8e0eb);border-radius:6px;padding:9px 13px;background:var(--paper,#fff);color:var(--ink,#172b45);font-weight:600;min-height:40px}.ds-control:hover{background:#e8eef7}.ds-control:disabled{opacity:.6;cursor:wait}.ds-control:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-primary{background:var(--blue,#154fba);border-color:var(--blue,#154fba);color:white}.ds-primary:hover{background:#103e95}.ds-small{font-size:12px;padding:7px 10px;min-height:36px}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Load or clear a local sample.",
+      "html": "<button class=\"ds-control\">Load demo</button>",
+      "css": ".ds-control{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;cursor:pointer;border:1px solid var(--line,#d8e0eb);border-radius:6px;padding:9px 13px;background:var(--paper,#fff);color:var(--ink,#172b45);font-weight:600;min-height:40px}.ds-control:hover{background:#e8eef7}.ds-control:disabled{opacity:.6;cursor:wait}.ds-control:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}"
+    },
+    {
+      "name": "Text action",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Download the synthetic example.",
+      "html": "<button class=\"ds-control ds-text\">Download example JSON</button>",
+      "css": ".ds-control{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;cursor:pointer;border:1px solid var(--line,#d8e0eb);border-radius:6px;padding:9px 13px;background:var(--paper,#fff);color:var(--ink,#172b45);font-weight:600;min-height:40px}.ds-control:hover{background:#e8eef7}.ds-control:disabled{opacity:.6;cursor:wait}.ds-control:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-text{border:0;background:none;padding:0;min-height:32px;color:var(--blue,#154fba);text-decoration:underline;text-underline-offset:3px}"
+    },
+    {
+      "name": "Adjustment checkbox",
+      "kind": "input",
+      "refersTo": "adjustment-checkbox",
+      "description": "Native control for the sensitivity scenario.",
+      "html": "<label class=\"ds-label\"><input class=\"ds-check\" type=\"checkbox\" checked>Combine exact wording matches</label>",
+      "css": ".ds-label{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;display:flex;gap:9px;align-items:start;color:var(--ink,#172b45);font-weight:600;cursor:pointer}.ds-check{width:17px;height:17px;margin:3px 0 0;accent-color:var(--blue,#154fba);flex-shrink:0}.ds-check:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}"
+    },
+    {
+      "name": "Synthetic provenance",
+      "kind": "custom",
+      "refersTo": "source-note-synthetic",
+      "description": "Explicit origin notice for invented data.",
+      "html": "<div class=\"ds-source\"><strong>Synthetic demonstration</strong><span>Invented reviews and totals. No real clinic is assessed.</span></div>",
+      "css": ".ds-source{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;display:grid;gap:2px;font-size:12px;padding:10px 12px;border-radius:4px;background:#fff4d9;color:#71521a}.ds-source strong{font-weight:650;color:#624309}"
+    },
+    {
+      "name": "Rating worksheet",
+      "kind": "card",
+      "refersTo": "rating-sheet",
+      "description": "Paired sample numbers with visible coverage.",
+      "html": "<section class=\"ds-sheet\"><h2>Adjusted sample rating</h2><div class=\"ds-pair\"><div class=\"ds-main\"><strong>4.00</strong><span>out of 5</span></div><div class=\"ds-original\"><span>Original sample</span><strong>4.50<small> / 5</small></strong></div></div><p>Illustrative values only; synthetic sample.</p></section>",
+      "css": ".ds-sheet{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;background:var(--tint,#edf3ff);padding:18px 18px 16px;border-radius:8px;color:#163f82}.ds-sheet h2{margin:0;font-size:15px;font-weight:650}.ds-pair{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:8px 0 10px;font-variant-numeric:tabular-nums}.ds-main{display:flex;align-items:baseline;gap:7px}.ds-main strong{font-size:52px;line-height:1.1;font-weight:650;letter-spacing:-.04em}.ds-main span{font-size:12px;white-space:nowrap}.ds-original{border-left:1px solid #bacceb;padding-left:18px;display:grid;gap:4px;color:#39557e}.ds-original>span{font-size:11px}.ds-original>strong{font-size:24px;line-height:1.2;font-weight:600}.ds-original small{font-weight:400;font-size:12px}.ds-sheet p{margin:0;font-size:12px;color:#355681}@media(max-width:360px){.ds-sheet{padding:15px}.ds-main strong{font-size:44px}.ds-original{padding-left:12px}.ds-original>span{font-size:10px}}"
+    },
+    {
+      "name": "Method disclosure",
+      "kind": "custom",
+      "refersTo": "disclosure",
+      "description": "Native disclosure for arithmetic and provenance limitations.",
+      "html": "<details class=\"ds-method\"><summary>How this adjustment works</summary><p>Each exact wording group contributes its mean stars as one vote. No entry is labeled fake.</p></details>",
+      "css": ".ds-method{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;font-size:12px;border-bottom:1px solid var(--line,#d8e0eb);color:var(--ink,#172b45)}.ds-method summary{cursor:pointer;list-style:none;padding:15px 0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:12px}.ds-method summary::-webkit-details-marker{display:none}.ds-method summary::after{content:\"+\";color:var(--blue,#154fba);font-size:17px;font-weight:400}.ds-method[open] summary::after{content:\"−\"}.ds-method summary:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-method p{margin:0 0 13px;color:var(--muted,#52647b)}"
+    },
+    {
+      "name": "Review entry",
+      "kind": "custom",
+      "refersTo": "review-entry",
+      "description": "Traceable original text with numerical weight.",
+      "html": "<div class=\"ds-entry\"><div class=\"ds-heading\"><strong>synthetic-01</strong><span>5/5 · 1 vote</span></div><p>Invented review text for this component preview.</p><small>Date unknown</small></div>",
+      "css": ".ds-entry{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;padding:13px 0;border-top:1px solid var(--line,#d8e0eb);overflow-wrap:anywhere}.ds-heading{display:flex;justify-content:space-between;gap:10px;color:var(--ink,#172b45);font-size:12px;font-variant-numeric:tabular-nums}.ds-heading strong{font-weight:650}.ds-heading span{white-space:nowrap;color:var(--muted,#52647b)}.ds-entry p{margin:7px 0;font-size:13px;line-height:1.6}.ds-entry small{display:block;font-size:11px;color:var(--muted,#52647b)}@media(max-width:360px){.ds-heading{flex-wrap:wrap}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Decision Worksheet",
+    "overview": "A white decision worksheet with ink-blue navigation, flat ruled sections and system UI lettering. Numbers lead; origin, coverage and limitations stay close to the evidence they qualify.\n\nThe operative extension uses restrained controls and native disclosures to keep the review comparison readable beside a browser page. It documents a local sample sensitivity scenario, with no visual claim of clinical competence or review authenticity.",
+    "keyCharacteristics": [
+      "White paper and flat ruled evidence sections.",
+      "A prominent adjusted number paired with its original average.",
+      "System UI lettering and aligned tabular numbers.",
+      "Local provenance, explicit uncertainty and native disclosures."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Proximity Rule",
+        "body": "Keep origin, coverage and sample limitations close to the result they qualify.",
+        "section": "colors"
+      },
+      {
+        "name": "The Operative Type Rule",
+        "body": "Use the approved system UI stack on this extension; reserve scale for the numerical comparison rather than decorative display lettering.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ruled Worksheet Rule",
+        "body": "Separate evidence with thin rules and quiet tonal fields; the shipped interface has no shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep origin, sample coverage and uncertainty beside numerical evidence.",
+      "Do use system UI lettering for the operative extension and tabular figures for comparisons.",
+      "Do retain native disclosure and checkbox keyboard behavior, visible focus and narrow-panel wrapping.",
+      "Do label synthetic demonstrations and distinguish context observations from rating changes."
+    ],
+    "donts": [
+      "Don't present the sample adjustment as a clinical-quality or authenticity verdict.",
+      "Don't add decorative imagery or theatrical depth to this worksheet.",
+      "Don't hide unknown provenance or missing values behind reassuring styling."
+    ]
+  }
+}

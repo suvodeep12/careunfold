@@ -65,3 +65,5 @@ Read [the feasibility investigation](research/feasibility.md), [dataset audit](r
 The approved direction is evidence-based doctor comparison. Patient experience and clinical quality remain separate: systematic reviews report stronger links to patient experience than consistent links to clinical outcomes ([2022 review](https://pubmed.ncbi.nlm.nih.gov/34027743/), [2019 review](https://www.jmir.org/2019/4/e12521/)). The [NMC registry](https://nmr.nmc.org.in/search-doctor) is a candidate registration source, not an implemented integration.
 
 See [AGENTS.md](AGENTS.md) for contributor workflow and claim boundaries. This repository currently provides no software license grant.
+
+See [verification evidence](research/verification.md) for checked behavior and remaining gaps, and [doctor-source checks](research/doctor-evidence.md) for the registration pilot. GitHub Actions runs type checks, tests and ZIP packaging on pushes and pull requests; a successful run retains the extension ZIP as an artifact.

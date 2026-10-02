@@ -8,7 +8,17 @@ User clarified that free means **no paid service dependency for the extension lo
 
 Observe only already-loaded doctor results and refresh the comparison when those results change. Search cards alone do not provide the review history needed for text analysis. The remaining workflow decision is whether to read only review pages the user opens, or obtain consent to reuse one temporary background tab sequentially for review pages of those already-loaded doctors. Chrome supports creating inactive tabs; that capability does not prove that a particular Maps review reader will work or be permitted. Do not auto-scroll to collect additional search results. Review completeness and access remain unresolved, and the reader must report missing evidence rather than invent ratings. [Chrome tabs API](https://developer.chrome.com/docs/extensions/reference/api/tabs), [Google review-reading instructions](https://support.google.com/maps/answer/6230175?hl=en)
 
-No paid service, scraper plugin or third-party runtime is needed for this proposed extension architecture. It still uses the user's browser, network and computing resources. No local reader has been built or run in this investigation.
+No paid service, scraper plugin or third-party runtime is needed for this proposed extension architecture. It still uses the user's browser, network and computing resources.
+
+### Local adapter preparation, 2 October 2026
+
+User approved reusing one temporary background tab for review pages of already-loaded doctors. The review-loading depth remains an unanswered question; do not assume an unlimited load or claim a statistically justified sample size.
+
+Read-only browser inspection observed eight loaded search cards with place links, aggregate ratings and counts. On the supplied Dr Akash Garg listing, the overview exposed three preview reviews while the full Reviews tab returned no review entries in the inspected session. Login was displayed, but the observation does not establish why the review tab was empty. Do not substitute previews for full-history evidence.
+
+`lib/maps-dom.ts` reads only rendered search-feed cards and review-card markup. It validates place URLs, deduplicates listing/review identities, excludes owner replies and keeps relative date labels separate from calendar dates. Missing translation/edit markers remain unknown. English rating labels and the observed DOM classes are the current supported shape; other layouts/locales can remain unavailable. Synthetic DOM regression tests pass using the already-installed LinkeDOM package, now declared explicitly as a development dependency. No real review text is committed.
+
+The parsers are preparation only: no automatic tab queue, Maps permission grant, review scrolling or live side-panel comparison is shipped yet. No installed-extension verification or complete review acquisition is claimed. Platform access and rating validation remain unresolved.
 
 ## Optional bounded cloud pilot, not the production dependency
 

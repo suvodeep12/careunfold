@@ -40,3 +40,21 @@ it('hands an activated worker tab to the user and never navigates to the next li
   expect(mock.tabs.sendMessage).toHaveBeenCalledWith(91, { kind: 'careunfold:stop' });
   expect(mock.tabs.remove).not.toHaveBeenCalled();
 });
+
+it('waits for asynchronous tab removal before a cancelled batch finishes', async () => {
+  vi.clearAllMocks();
+  const controller = new AbortController();
+  let release!: () => void;
+  mock.tabs.remove.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve; }));
+  mock.tabs.sendMessage.mockImplementationOnce(async () => {
+    controller.abort(new Error('Cancelled during review loading.'));
+    return { capture: { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' } };
+  });
+  let finished = false;
+  const batch = loadMapsBatch(places, 2, vi.fn(), controller.signal).catch(error => error).finally(() => { finished = true; });
+  await vi.waitFor(() => expect(mock.tabs.remove).toHaveBeenCalledExactlyOnceWith(91));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  try { expect(finished).toBe(false); }
+  finally { release(); await batch; }
+  expect(mock.tabs.update).toHaveBeenCalledTimes(1);
+});

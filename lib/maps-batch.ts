@@ -42,10 +42,12 @@ export async function loadMapsBatch(
     controller.abort(new Error('The review tab was activated. Review loading stopped.'));
   };
   const removed = (tabId: number) => { if (tabId === ownedTab) { ownedTab = undefined; controller.abort(new Error('The review tab was closed.')); } };
+  let closing: Promise<void> = Promise.resolve();
   const close = async () => {
     const id = ownedTab;
     ownedTab = undefined;
-    if (id !== undefined) await browser.tabs.remove(id).catch(() => {});
+    if (id !== undefined) closing = browser.tabs.remove(id).catch(() => {});
+    await closing;
   };
   signal.throwIfAborted();
   signal.addEventListener('abort', cancel, { once: true });

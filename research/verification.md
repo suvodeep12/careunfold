@@ -21,3 +21,9 @@ The duplicate adjustment is a deterministic sensitivity scenario. There is no ev
 TypeScript, 19 tests and the production build pass. Required review depth has no default; the live view requests optional Google site access only on an explicit Enable action. Capture messages are validated at the extension boundary. Synthetic rendered comparisons verify separate Google listing, sample and adjusted values, unknown metadata and unavailable outcomes.
 
 Browser previews at 320 and 400 pixels showed the controls and synthetic waiting/captured/unavailable rows without horizontal overflow. The preview correctly rejects live collection outside an installed extension. These checks do not verify successful real Maps review collection, installed permission prompts, worker lifetime or background-tab behavior. Previous installed evidence above applies only to the earlier demo version.
+
+### Cancellation cleanup regression, 2 October 2026
+
+An asynchronous mock of native tab removal reproduced a race: cancellation could finish the batch while its owned tab was still closing. Cleanup now awaits the same removal promise on both abort and finalization, preserving sequential cleanup before replacement batches. The regression failed before the fix and passes after it; all 20 tests, TypeScript and production build pass. GitHub CI separately passed for the preceding UI commit `65f68e8`.
+
+Current browser inventory exposes only the Codex in-app browser and MCP Apps, not the user’s installed Chromium extension. Successful native Maps collection remains unverified and requires that installed session; synthetic and mocked checks do not substitute for it.

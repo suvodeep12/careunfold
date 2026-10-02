@@ -46,7 +46,15 @@ export async function collectMapsReviews(
   const samePlace = () => mapsPlaceIdentity(currentUrl())?.key === expectedKey;
   if (!samePlace()) return { ...result, stopped: 'identity-changed' };
   signal.throwIfAborted();
-  const tab = doc.querySelector<HTMLButtonElement>('[role="main"] button[role="tab"][aria-label^="Reviews for "]');
+  // Native load completion can precede Maps rendering its listing controls.
+  const findTab = () => doc.querySelector<HTMLButtonElement>('[role="main"] button[role="tab"][aria-label^="Reviews for "]');
+  let tab = findTab();
+  const controlsBy = Date.now() + 10_000;
+  while (!tab && Date.now() < controlsBy) {
+    await pause(250, signal);
+    if (!samePlace()) return { ...result, stopped: 'identity-changed' };
+    tab = findTab();
+  }
   if (!tab) return { ...result, stopped: 'unsupported' };
   if (tab.getAttribute('aria-selected') !== 'true') tab.click();
 
@@ -55,10 +63,11 @@ export async function collectMapsReviews(
   while (Date.now() < readyBy) {
     signal.throwIfAborted();
     if (!samePlace()) return { ...result, stopped: 'identity-changed' };
-    if (tab.getAttribute('aria-selected') === 'true' && doc.querySelector('[role="main"] button[aria-label="Sort reviews"]')) break;
+    tab = findTab() ?? tab;
+    if (tab.isConnected && tab.getAttribute('aria-selected') === 'true' && tab.closest('[role="main"]')?.querySelector('button[aria-label="Sort reviews"]')) break;
     await pause(250, signal);
   }
-  if (tab.getAttribute('aria-selected') !== 'true') return result;
+  if (!tab.isConnected || tab.getAttribute('aria-selected') !== 'true') return result;
   const main = tab.closest<HTMLElement>('[role="main"]');
   const sort = main?.querySelector<HTMLButtonElement>('button[aria-label="Sort reviews"]');
   if (!main || !sort) return { ...result, stopped: 'unsupported' };

@@ -56,3 +56,34 @@ it('discards the sample if a page changes to another listing during loading', as
     expect(await capture).toEqual({ reviews: [], sort: 'newest-confirmed', stopped: 'identity-changed' });
   } finally { vi.useRealTimers(); }
 });
+
+it('waits for Maps to render review controls after document load', async () => {
+  vi.useFakeTimers();
+  try {
+    const { document } = parseHTML('<html><body><div role="main"></div></body></html>');
+    const capture = collectMapsReviews(document, () => url, '0x1:0x2', 1, new AbortController().signal);
+    setTimeout(() => {
+      document.body.innerHTML = page().body.innerHTML;
+      document.querySelector('[role="menuitemradio"]')!.addEventListener('click', () => {
+        document.querySelector('[aria-live]')!.textContent = 'The reviews are now sorted from newest to oldest.';
+      });
+      document.querySelector('[role="main"]')!.insertAdjacentHTML('beforeend', card('delayed'));
+    }, 500);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(await capture).toMatchObject({ sort: 'newest-confirmed', stopped: 'limit', reviews: [{ id: 'delayed' }] });
+  } finally { vi.useRealTimers(); }
+});
+
+it('bounds the wait for missing controls and allows cancellation during that wait', async () => {
+  vi.useFakeTimers();
+  try {
+    const { document } = parseHTML('<html><body></body></html>');
+    const missing = collectMapsReviews(document, () => url, '0x1:0x2', 1, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(await missing).toMatchObject({ sort: 'unknown', stopped: 'unsupported', reviews: [] });
+    const controller = new AbortController();
+    const aborted = expect(collectMapsReviews(document, () => url, '0x1:0x2', 1, controller.signal)).rejects.toThrow('Stop while loading');
+    controller.abort(new Error('Stop while loading'));
+    await aborted;
+  } finally { vi.useRealTimers(); }
+});

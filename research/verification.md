@@ -27,3 +27,9 @@ Browser previews at 320 and 400 pixels showed the controls and synthetic waiting
 An asynchronous mock of native tab removal reproduced a race: cancellation could finish the batch while its owned tab was still closing. Cleanup now awaits the same removal promise on both abort and finalization, preserving sequential cleanup before replacement batches. The regression failed before the fix and passes after it; all 20 tests, TypeScript and production build pass. GitHub CI separately passed for the preceding UI commit `65f68e8`.
 
 Current browser inventory exposes only the Codex in-app browser and MCP Apps, not the user’s installed Chromium extension. Successful native Maps collection remains unverified and requires that installed session; synthetic and mocked checks do not substitute for it.
+
+### Delayed Maps controls, 2 October 2026
+
+User-supplied installed Chromium screenshot confirms automatic loaded-card reading with Google aggregate ratings/counts, but zero captured reviews and an unsupported layout/sort result. A separate in-app browser inspection of the affected Pradeep Prakash listing observed an initial Maps shell before its listing/review controls appeared. The loader previously returned unsupported immediately when its first query missed those controls. A delayed-render regression reproduced that exact result before the fix. The loader now waits up to ten seconds for the controls, preserves cancellation/identity checks, and rereads the tab during full-review navigation.
+
+The observed full Reviews tab and Newest menu/confirmation remain supported, but zero full-review cards were observed in this in-app session. This verifies a startup race and its regression fix, not that it explains every installed failure or that real review collection succeeds. No real review text was committed.

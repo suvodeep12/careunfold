@@ -1,119 +1,122 @@
 ---
-name: "CareUnfold"
-description: "A white decision worksheet for transparent sample review adjustments."
+name: CareUnfold
+description: A white decision worksheet for transparent sample review adjustments.
 colors:
-  ink: "#172b45"
-  muted: "#52647b"
-  blue: "#154fba"
-  line: "#d8e0eb"
-  paper: "#fff"
-  tint: "#edf3ff"
-  focus: "#0c409b"
-  canvas: "#f1f4f8"
-  button-hover: "#e8eef7"
-  primary-hover: "#103e95"
-  source-surface: "#f0f3f7"
-  source-text: "#405570"
-  synthetic-surface: "#fff4d9"
-  synthetic-text: "#71521a"
-  synthetic-title: "#624309"
-  rating-ink: "#163f82"
-  rating-divider: "#bacceb"
-  original-ink: "#39557e"
-  caption-ink: "#355681"
-  boundary-ink: "#43556d"
-  effect-ink: "#234e93"
-  effect-surface: "#f2f6ff"
-  error-surface: "#fff1f0"
-  error-ink: "#8a2925"
-  error-line: "#dfb8b5"
-  selection-surface: "#c5d8ff"
-  selection-ink: "#112d5d"
-  scrollbar: "#a9b7cc"
+  ink: '#172b45'
+  muted: '#52647b'
+  blue: '#154fba'
+  line: '#d8e0eb'
+  paper: '#fff'
+  tint: '#edf3ff'
+  focus: '#0c409b'
+  canvas: '#f1f4f8'
+  button-hover: '#e8eef7'
+  primary-hover: '#103e95'
+  source-surface: '#f0f3f7'
+  source-text: '#405570'
+  synthetic-surface: '#fff4d9'
+  synthetic-text: '#71521a'
+  synthetic-title: '#624309'
+  rating-ink: '#163f82'
+  rating-divider: '#bacceb'
+  original-ink: '#39557e'
+  caption-ink: '#355681'
+  boundary-ink: '#43556d'
+  effect-ink: '#234e93'
+  effect-surface: '#f2f6ff'
+  error-surface: '#fff1f0'
+  error-ink: '#8a2925'
+  error-line: '#dfb8b5'
+  selection-surface: '#c5d8ff'
+  selection-ink: '#112d5d'
+  scrollbar: '#a9b7cc'
 typography:
   body:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "14px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 14px
     lineHeight: 1.55
   title:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "24px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 24px
     fontWeight: 650
     lineHeight: 1.3
-    letterSpacing: "-.02em"
+    letterSpacing: -.02em
   section:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "17px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 17px
     fontWeight: 650
     lineHeight: 1.4
   rating:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "52px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 52px
     fontWeight: 650
     lineHeight: 1.1
-    letterSpacing: "-.04em"
+    letterSpacing: -.04em
   label:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "12px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 12px
     lineHeight: 1.55
   wordmark:
-    fontFamily: "Segoe UI, Roboto, \"Noto Sans\", sans-serif"
-    fontSize: "19px"
+    fontFamily: Segoe UI, Roboto, "Noto Sans", sans-serif
+    fontSize: 19px
     fontWeight: 700
     lineHeight: 1.55
 rounded:
-  note: "4px"
-  control: "6px"
-  sheet: "8px"
-  wide-shell: "10px"
+  note: 4px
+  control: 6px
+  sheet: 8px
+  wide-shell: 10px
 spacing:
-  icon-gap: "8px"
-  compact-gap: "12px"
-  control-section: "16px"
-  section: "20px"
-  panel-inset: "22px"
-  evidence-section: "30px"
+  icon-gap: 8px
+  compact-gap: 12px
+  control-section: 16px
+  section: 20px
+  panel-inset: 22px
+  evidence-section: 30px
 components:
   button-primary:
-    backgroundColor: "{colors.blue}"
-    textColor: "{colors.paper}"
-    rounded: "{rounded.control}"
-    padding: "9px 13px"
+    backgroundColor: '{colors.blue}'
+    textColor: '{colors.paper}'
+    rounded: '{rounded.control}'
+    padding: 9px 13px
   button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
+    backgroundColor: '{colors.primary-hover}'
   button-primary-small:
-    backgroundColor: "{colors.blue}"
-    textColor: "{colors.paper}"
-    rounded: "{rounded.control}"
-    padding: "7px 10px"
-    typography: "{typography.label}"
+    backgroundColor: '{colors.blue}'
+    textColor: '{colors.paper}'
+    rounded: '{rounded.control}'
+    padding: 7px 10px
+    typography: '{typography.label}'
   button-secondary:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.control}"
-    padding: "9px 13px"
+    backgroundColor: '{colors.paper}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.control}'
+    padding: 9px 13px
   button-text:
-    textColor: "{colors.blue}"
-    padding: "0"
+    textColor: '{colors.blue}'
+    padding: '0'
   rating-sheet:
-    backgroundColor: "{colors.tint}"
-    textColor: "{colors.rating-ink}"
-    rounded: "{rounded.sheet}"
-    padding: "18px 18px 16px"
+    backgroundColor: '{colors.tint}'
+    textColor: '{colors.rating-ink}'
+    rounded: '{rounded.sheet}'
+    padding: 18px 18px 16px
   source-note-synthetic:
-    backgroundColor: "{colors.synthetic-surface}"
-    textColor: "{colors.synthetic-text}"
-    rounded: "{rounded.note}"
-    padding: "10px 12px"
-    typography: "{typography.label}"
+    backgroundColor: '{colors.synthetic-surface}'
+    textColor: '{colors.synthetic-text}'
+    rounded: '{rounded.note}'
+    padding: 10px 12px
+    typography: '{typography.label}'
   disclosure:
-    textColor: "{colors.ink}"
-    padding: "15px 0"
+    textColor: '{colors.ink}'
+    padding: 15px 0
   review-entry:
-    textColor: "{colors.ink}"
-    padding: "13px 0"
+    textColor: '{colors.ink}'
+    padding: 13px 0
   adjustment-checkbox:
-    size: "17px"
+    size: 17px
+  wordmark-navigation:
+    textColor: '{colors.ink}'
+    typography: '{typography.wordmark}'
 ---
 
 # Design System: CareUnfold

@@ -505,15 +505,23 @@
       "refersTo": "disclosure",
       "description": "Native disclosure for arithmetic and provenance limitations.",
       "html": "<details class=\"ds-method\"><summary>How this adjustment works</summary><p>Each exact wording group contributes its mean stars as one vote. No entry is labeled fake.</p></details>",
-      "css": ".ds-method{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;font-size:12px;border-bottom:1px solid var(--line,#d8e0eb);color:var(--ink,#172b45)}.ds-method summary{cursor:pointer;list-style:none;padding:15px 0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:12px}.ds-method summary::-webkit-details-marker{display:none}.ds-method summary::after{content:\"+\";color:var(--blue,#154fba);font-size:17px;font-weight:400}.ds-method[open] summary::after{content:\"−\"}.ds-method summary:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-method p{margin:0 0 13px;color:var(--muted,#52647b)}"
+      "css": ".ds-method{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;font-size:12px;border-bottom:1px solid var(--line,#d8e0eb);color:var(--ink,#172b45)}.ds-method summary{cursor:pointer;list-style:none;padding:15px 0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:12px}.ds-method summary::-webkit-details-marker{display:none}.ds-method summary::after{content:\"+\";color:var(--blue,#154fba);font-size:17px;font-weight:400}.ds-method[open] summary::after{content:\"âˆ’\"}.ds-method summary:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}.ds-method p{margin:0 0 13px;color:var(--muted,#52647b)}"
     },
     {
       "name": "Review entry",
       "kind": "custom",
       "refersTo": "review-entry",
       "description": "Traceable original text with numerical weight.",
-      "html": "<div class=\"ds-entry\"><div class=\"ds-heading\"><strong>synthetic-01</strong><span>5/5 · 1 vote</span></div><p>Invented review text for this component preview.</p><small>Date unknown</small></div>",
+      "html": "<div class=\"ds-entry\"><div class=\"ds-heading\"><strong>synthetic-01</strong><span>5/5 Â· 1 vote</span></div><p>Invented review text for this component preview.</p><small>Date unknown</small></div>",
       "css": ".ds-entry{font-family:Segoe UI, Roboto, \"Noto Sans\", sans-serif;font-size:14px;line-height:1.55;padding:13px 0;border-top:1px solid var(--line,#d8e0eb);overflow-wrap:anywhere}.ds-heading{display:flex;justify-content:space-between;gap:10px;color:var(--ink,#172b45);font-size:12px;font-variant-numeric:tabular-nums}.ds-heading strong{font-weight:650}.ds-heading span{white-space:nowrap;color:var(--muted,#52647b)}.ds-entry p{margin:7px 0;font-size:13px;line-height:1.6}.ds-entry small{display:block;font-size:11px;color:var(--muted,#52647b)}@media(max-width:360px){.ds-heading{flex-wrap:wrap}}"
+    },
+    {
+      "name": "Wordmark navigation",
+      "kind": "nav",
+      "refersTo": "wordmark-navigation",
+      "description": "Keyboard-accessible skip link to results.",
+      "html": "<a class=\"ds-wordmark\" href=\"#ds-results\" aria-label=\"CareUnfold, skip to results\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"M5 3h10l4 4v14H5zM9 10h6M9 14h6M9 18h3\" /></svg>CareUnfold</a><div id=\"ds-results\"></div>",
+      "css": ".ds-wordmark{font-family:Segoe UI,Roboto,\"Noto Sans\",sans-serif;line-height:1.55;display:flex;align-items:center;gap:8px;color:var(--ink,#172b45);font-size:19px;font-weight:700;text-decoration:none}.ds-wordmark svg{color:var(--blue,#154fba);width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}.ds-wordmark:focus-visible{outline:3px solid var(--focus,#0c409b);outline-offset:3px}"
     }
   ],
   "narrative": {

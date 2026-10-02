@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { analyze, type Dataset } from '../../lib/analysis';
-import { isMapsPage, MAPS_SITE, parseLoadedPlaces, type MapsPlace } from '../../lib/maps-dom';
+import { isMapsPage, MAPS_SITES, parseLoadedPlaces, type MapsPlace } from '../../lib/maps-dom';
 import type { MapsCapture } from '../../lib/maps-loader';
 
 type Row = { place: MapsPlace; capture?: MapsCapture | null; error?: string; capturedAt?: string };
@@ -85,7 +85,7 @@ export default function MapsComparison() {
     try {
       const connection = connectPanel();
       // Request from this button's user gesture, before other asynchronous work.
-      const allowed = await browser.permissions.request({ origins: [MAPS_SITE] });
+      const allowed = await browser.permissions.request({ origins: MAPS_SITES });
       if (attempt !== startup.current) return;
       if (!allowed) throw new Error('Site access was declined. Enable it to read your Maps search.');
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -101,7 +101,7 @@ export default function MapsComparison() {
     <label className="maps-depth" htmlFor="review-depth">Review limit per listing<select id="review-depth" value={depth} disabled={active || starting} onChange={event => setDepth(event.target.value)}><option value="">Choose a review limit</option><option value="100">Up to 100 newest reviews</option><option value="all">Attempt all available reviews</option></select></label>
     <p className="coverage">A stalled page or 90-second collection deadline can leave either option incomplete. No completeness is inferred.</p>
     <div className="maps-actions"><button className="primary" disabled={!depth || active || starting} onClick={start}>{starting ? 'Connecting…' : 'Enable on this Maps tab'}</button><button disabled={!active && !starting} onClick={stop}>Stop</button></div>
-    <p className="boundary">Requires optional Google site access. Chrome grants access to the Google origin; CareUnfold reads Maps paths only. One temporary review tab is reused. Closing this panel stops collection; reloading Maps requires reconnection.</p>
+    <p className="boundary">Requires optional access to google.com and google.co.in. Chrome grants access to those Google origins; CareUnfold reads Maps paths only. One temporary review tab is reused. Closing this panel stops collection; reloading Maps requires reconnection.</p>
     {!installed && <p className="source-note">Browser preview only. Live collection requires the installed extension.</p>}
     {error && <div className="error" role="alert"><strong>Maps needs attention</strong><p>{error}</p></div>}
     <p className="status maps-status" role="status">{status}</p>

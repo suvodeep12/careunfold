@@ -8,6 +8,16 @@ it('accepts a supported place identity while rejecting unsafe and unrelated URLs
   for (const bad of ['javascript:alert(1)', 'https://www.google.com.evil.test/maps/place/x/data=!1s0x1:0x2', 'https://user@www.google.com/maps/place/x/data=!1s0x1:0x2', 'https://www.google.com/maps/contrib/123', 'https://www.google.com/maps/place/x/data=%invalid']) expect(mapsPlaceIdentity(bad)).toBeNull();
 });
 
+it('accepts India Maps pages and identities without accepting lookalikes or other sites', () => {
+  const url = 'https://www.google.co.in/maps/place/Invented/data=!1s0x123:0x456?authuser=1&rclk=1';
+  expect(isMapsPage('https://www.google.co.in/maps/search/urologist')).toBe(true);
+  expect(mapsPlaceIdentity(url)).toEqual({ key: '0x123:0x456', url: 'https://www.google.co.in/maps/place/Invented/data=!1s0x123:0x456?authuser=1' });
+  for (const bad of ['https://www.google.co.in.evil.test/maps/place/x/data=!1s0x1:0x2', 'https://user@www.google.co.in/maps/place/x/data=!1s0x1:0x2', 'http://www.google.co.in/maps/place/x/data=!1s0x1:0x2', 'https://www.google.co.in:444/maps/place/x/data=!1s0x1:0x2', 'https://www.google.co.in/search?q=doctor', 'https://www.google.co.uk/maps/place/x/data=!1s0x1:0x2']) {
+    expect(isMapsPage(bad)).toBe(false);
+    expect(mapsPlaceIdentity(bad)).toBeNull();
+  }
+});
+
 it('reads only loaded search cards and keeps distinct listing identities separate', () => {
   const article = (id: string, label = '') => `<div role="article"><a aria-label="Invented clinic" href="https://www.google.com/maps/place/Invented/data=!1s${id}"></a><span role="img" aria-label="${label}"></span></div>`;
   const { document } = parseHTML(`<html><body>${article('0x1:0x2', '5 stars 9 Reviews')}<div role="feed">${article('0x3:0x4', '4.8 stars 295 Reviews')}${article('0x3:0x4')}${article('0x5:0x6')}</div></body></html>`);

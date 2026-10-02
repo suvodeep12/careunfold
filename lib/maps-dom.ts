@@ -4,11 +4,11 @@ export type MapsReview = {
   id: string; text: string; rating: number; reportedDate?: string; reviewerReviewCount?: number;
   translated: boolean | null; truncated: boolean | null; edited: boolean | null;
 };
-export const MAPS_SITE = 'https://www.google.com/maps/*';
+export const MAPS_SITES = ['https://www.google.com/maps/*', 'https://www.google.co.in/maps/*'];
 export function isMapsPage(href: string): boolean {
   try {
     const url = new URL(href);
-    return url.protocol === 'https:' && url.hostname === 'www.google.com' && !url.port && !url.username && !url.password
+    return MAPS_SITES.includes(`${url.origin}/maps/*`) && !url.port && !url.username && !url.password
       && (url.pathname === '/maps' || url.pathname.startsWith('/maps/'));
   } catch { return false; }
 }
@@ -32,7 +32,7 @@ export function parseLoadedPlaces(raw: unknown): MapsPlace[] {
 export function mapsPlaceIdentity(href: string): { key: string; url: string } | null {
   try {
     const url = new URL(href);
-    if (url.protocol !== 'https:' || url.hostname !== 'www.google.com' || url.port || url.username || url.password || !url.pathname.startsWith('/maps/place/')) return null;
+    if (!isMapsPage(href) || !url.pathname.startsWith('/maps/place/')) return null;
     const path = decodeURIComponent(url.pathname);
     const key = path.match(/!1s(0x[\da-f]+:0x[\da-f]+)/i)?.[1]
       ?? path.match(/!(?:1|19)s(ChIJ[\w-]+)/)?.[1];

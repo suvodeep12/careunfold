@@ -1,6 +1,6 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
-import { isMapsPage, MAPS_SITE, parseLoadedPlaces, type MapsPlace } from '../lib/maps-dom';
+import { isMapsPage, MAPS_SITES, parseLoadedPlaces, type MapsPlace } from '../lib/maps-dom';
 import { loadMapsBatch } from '../lib/maps-batch';
 
 export default defineBackground(() => {
@@ -75,7 +75,7 @@ export default defineBackground(() => {
         const version = generation;
         void (async () => {
           try {
-            if (!await browser.permissions.contains({ origins: [MAPS_SITE] })) throw new Error('Google Maps site access is not enabled.');
+            if (!await browser.permissions.contains({ origins: MAPS_SITES })) throw new Error('Google Maps site access is not enabled.');
             const tab = await browser.tabs.get(message.sourceTabId);
             if (!isMapsPage(tab.url ?? '')) throw new Error('Open a Google Maps search in the source tab.');
             if (version !== generation) return;
@@ -105,6 +105,6 @@ export default defineBackground(() => {
   });
   browser.tabs.onRemoved.addListener(tabId => { if (tabId === sourceId) stop('The source Maps tab was closed.'); });
   browser.permissions.onRemoved.addListener(() => {
-    void browser.permissions.contains({ origins: [MAPS_SITE] }).then(allowed => { if (!allowed) stop('Google Maps site access was removed.'); });
+    void browser.permissions.contains({ origins: MAPS_SITES }).then(allowed => { if (!allowed) stop('Google Maps site access was removed.'); });
   });
 });

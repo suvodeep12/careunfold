@@ -18,7 +18,7 @@ const mock = vi.hoisted(() => {
       return port;
     }) },
     permissions: { request: vi.fn(async () => true) },
-    tabs: { query: vi.fn(async () => [{ id: 3, url: 'https://www.google.com/maps/search/doctor' }]) },
+    tabs: { query: vi.fn(async () => [{ id: 3, url: 'https://www.google.co.in/maps/search/doctor' }]) },
   };
 });
 vi.mock('wxt/browser', () => ({ browser: mock }));
@@ -41,6 +41,7 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
     expect(enable.disabled).toBe(false);
     await act(async () => enable.click());
     expect(mock.runtime.connect).toHaveBeenCalledTimes(2);
+    expect(mock.permissions.request).toHaveBeenCalledWith({ origins: ['https://www.google.com/maps/*', 'https://www.google.co.in/maps/*'] });
     expect(mock.ports[1].postMessage).toHaveBeenCalledWith({ kind: 'start', sourceTabId: 3, limit: 100 });
     await act(async () => mock.ports[1].onMessage.fire({ kind: 'stopped', message: 'Stopped.' }));
     mock.ports[1].postMessage.mockClear();

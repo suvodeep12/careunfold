@@ -4,6 +4,7 @@ import { analyze, type Dataset } from '../../lib/analysis';
 import { isMapsPage, MAPS_SITES, parseLoadedPlaces, type MapsPlace } from '../../lib/maps-dom';
 import type { MapsCapture } from '../../lib/maps-loader';
 import VerificationSummary from './VerificationSummary';
+import StrictFilter from './StrictFilter';
 
 type Row = { place: MapsPlace; capture?: MapsCapture | null; error?: string; capturedAt?: string };
 const stars = (n: number | null | undefined) => n == null ? '—' : n.toFixed(2);
@@ -14,6 +15,7 @@ export function Listing({ row }: { row: Row }) {
   const result = analyze(sample);
   return <li className="maps-listing">
     <h2><a href={place.url} target="_blank" rel="noreferrer">{place.name}</a></h2>
+    {!!capture?.reviews.length && <StrictFilter reviews={sample.reviews} result={result} />}
     <VerificationSummary result={result} />
     <p className="coverage">Google listing: {stars(place.rating)} / 5 · Platform aggregate, not a verified experience rating</p>
     <p className="coverage">{capture ? `${capture.reviews.length} captured ratings` : row.error ? 'No sample available' : 'Waiting for reviews'}{place.totalReviews !== undefined ? ` · ${place.totalReviews} Google-listed reviews` : ' · listing total unknown'}</p>

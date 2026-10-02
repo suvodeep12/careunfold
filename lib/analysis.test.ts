@@ -3,6 +3,34 @@ import { analyze, parseDataset, type Dataset, type Review } from './analysis';
 const review = (id: string, extra: Partial<Review> = {}): Review => ({ id, text: 'The consultation was helpful and my questions were answered.', rating: 5, translated: false, truncated: false, edited: false, ...extra });
 const dataset = (reviews: Review[]): Dataset => ({ name: 'Synthetic test', source: 'synthetic', sampling: 'selected', reviews });
 describe('review evidence boundaries', () => {
+  it('strictly excludes every original full-text match regardless of stars, without granting verification', () => {
+    const result = analyze(dataset([review('positive'), review('negative', { rating: 1 }), review('kept', { text: 'Distinct review', rating: 3 })]));
+    expect(result.exclusions.map(r => r.id)).toEqual(['positive', 'negative']);
+    expect(result.filteredRating).toBe(3);
+    expect(result.retainedReviews).toBe(1);
+    expect(result.verifiedExperienceRating).toBeNull();
+    expect(analyze(dataset([review('a'), review('b')])).filteredRating).toBeNull();
+    expect(analyze(dataset([])).filteredRating).toBeNull();
+  });
+  it('requires both sparse history and a known unedited day cluster, preserving unknown and edited dates', () => {
+    const rows = [1, 2, 8, undefined].map((count, i) => review(String(i), { text: '', date: '2026-09-10', reviewerReviewCount: count }));
+    expect(analyze(dataset(rows)).exclusions.map(r => r.id)).toEqual(['0', '1']);
+    rows[0]!.edited = null;
+    expect(analyze(dataset(rows)).exclusions).toEqual([]);
+    const relative = rows.map(r => ({ ...r, date: undefined, reportedDate: 'a month ago' }));
+    expect(analyze(dataset(relative)).exclusions).toEqual([]);
+  });
+  it('does not infer suspicion from short praise, missing history, translation, or incomplete text alone', () => {
+    for (const extra of [{ text: 'Good doctor' }, { translated: true }, { truncated: true }, { truncated: null }, { text: '' }]) {
+      expect(analyze(dataset([review('a', extra), review('b', extra)])).exclusions).toEqual([]);
+    }
+    expect(analyze(dataset([review('a', { reviewerReviewCount: 1 })])).exclusions).toEqual([]);
+    const unknown = analyze(dataset([review('a', { translated: null }), review('b', { translated: null }), review('c')]));
+    expect(unknown.exclusions.map(r => r.id)).toEqual(['a', 'b']);
+    expect(unknown.exclusions[0]!.reasons[0]).toContain('Translation status is unknown');
+    expect(analyze(dataset([review('a', { translated: null })])).exclusions).toEqual([]);
+    expect(analyze(dataset([review('a', { text: '  THE CONSULTATION WAS HELPFUL AND MY QUESTIONS WERE ANSWERED. ' }), review('b')])).exclusions).toHaveLength(2);
+  });
   it('gives uncorroborated imports and Maps reviews no verified-rating contribution', () => {
     for (const source of ['synthetic', 'user-import', 'google-maps'] as const) {
       const input = { ...dataset([review('a'), review('b', { rating: 1 })]), source };

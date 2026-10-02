@@ -5,15 +5,32 @@ import { parseHTML } from 'linkedom';
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { Listing } from '../entrypoints/sidepanel/MapsComparison';
 import App from '../entrypoints/sidepanel/App';
+import StrictFilter from '../entrypoints/sidepanel/StrictFilter';
+import { analyze, type Dataset } from './analysis';
 import type { MapsCapture } from './maps-loader';
 
 vi.mock('wxt/browser', () => ({ browser: {} }));
 
-it('leads the demo/import view with verification status instead of a sample score', () => {
+it('separates the requested suspicion filter from verified status and the duplicate sensitivity scenario', () => {
   const { document } = parseHTML(renderToStaticMarkup(<App />));
   expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('Insufficient evidence');
   expect(document.querySelector('.sample-calculations')!.hasAttribute('open')).toBe(false);
   expect(document.querySelector('.sample-calculations summary')!.textContent).toBe('Unverified sample calculations');
+  const strict = document.querySelector('[aria-label="Strict review filter"]')!;
+  expect(strict.textContent).toContain('4.17 / 5');
+  expect(strict.textContent).toContain('6 of 12 sample reviews included · 6 excluded');
+  expect(strict.textContent).toContain('Original sample: 4.58 / 5');
+  expect(strict.querySelector('input')!.hasAttribute('checked')).toBe(true);
+  expect(strict.textContent).toContain('not proven fake');
+});
+
+it('shows insufficient evidence and original escaped text when the strict filter excludes everything', () => {
+  const sample: Dataset = { name: 'Invented', source: 'synthetic', sampling: 'selected', reviews: ['a', 'b'].map(id => ({ id, text: '<script>alert(1)</script> Synthetic repeated full original review text.', rating: 5, translated: false, truncated: false, edited: false })) };
+  const { document } = parseHTML(renderToStaticMarkup(<StrictFilter reviews={sample.reviews} result={analyze(sample)} />));
+  expect(document.querySelector('.filter-result')!.textContent).toContain('Insufficient evidence');
+  expect(document.querySelector('.filter-result')!.textContent).toContain('0 of 2 sample reviews included · 2 excluded');
+  expect(document.querySelector('script')).toBeNull();
+  expect(document.querySelector('.review-entry p')!.textContent).toContain('<script>alert(1)</script>');
 });
 
 it('keeps Google aggregates separate from sample calculations and unavailable evidence', () => {
@@ -29,7 +46,11 @@ it('keeps Google aggregates separate from sample calculations and unavailable ev
   expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('Insufficient evidence');
   expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('0 independently corroborated');
   expect(document.querySelector('details')!.hasAttribute('open')).toBe(false);
-  expect(document.querySelector('summary')!.textContent).toContain('Unverified sample calculations');
+  expect([...document.querySelectorAll('summary')].some(summary => summary.textContent!.includes('Unverified sample calculations'))).toBe(true);
+  expect(document.querySelector('[aria-label="Strict review filter"]')!.textContent).toContain('Estimated filtered sample rating');
+  expect(document.querySelector('.filter-result')!.textContent).toContain('1.00 / 5');
+  expect(document.querySelector('.filter-result')!.textContent).toContain('1 of 3 sample reviews included · 2 excluded');
+  expect(document.querySelector('[aria-label="Strict review filter"]')!.textContent).toContain('Translation status is unknown');
   const unavailable: MapsCapture = { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable', problem: 'No review cards appeared within 10 seconds.' };
   const missing = renderToStaticMarkup(<Listing row={{ place, capture: unavailable }} />);
   expect(missing).toContain('No adjusted rating is calculated');

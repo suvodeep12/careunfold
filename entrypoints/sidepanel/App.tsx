@@ -3,6 +3,7 @@ import { analyze, MAX_FILE_BYTES, parseDataset, type Dataset, type Review } from
 import { demo } from '../../lib/demo';
 import MapsComparison from './MapsComparison';
 import VerificationSummary from './VerificationSummary';
+import StrictFilter from './StrictFilter';
 
 const stars = (value: number | null) => value === null ? '—' : value.toFixed(2);
 function downloadExample() {
@@ -81,6 +82,7 @@ export default function App() {
           <h1>{dataset.name}</h1>
           <p className="coverage">{dataset.reviews.length} {dataset.totalReviews !== undefined ? `of ${dataset.totalReviews} declared reviews` : 'reviews supplied; total unknown'} · {dataset.sampling === 'complete' ? 'Declared complete sample' : dataset.sampling === 'selected' ? 'Selected sample' : 'Selection method unknown'}</p>
         </section>
+        <StrictFilter key={dataset === demo ? 'demo' : 'import'} reviews={dataset.reviews} result={result} />
         <VerificationSummary result={result} />
         <details className="method sample-calculations"><summary>Unverified sample calculations</summary>
         <section className="rating-sheet" aria-labelledby="rating-title">
@@ -122,7 +124,7 @@ export default function App() {
             <div><dt>Empty / incomplete text</dt><dd>{result.emptyText} / {result.truncated}</dd></div>
             <div><dt>Translated / edited</dt><dd>{result.translated} / {result.edited}</dd></div>
           </dl>
-          <p>Reviewer totals do not reveal account age. Small totals, positive stars, polished language and reported-date concentrations do not reduce weight.</p>
+          <p>Reviewer totals do not reveal account age. Sparse history and an exact-day cluster together trigger the separate strict filter. Positive stars and polished language alone do not change either calculation.</p>
           <p>Dates are supplied by the import; we do not verify them. Four entries with known unedited status on the same reported day produce a context finding, not a fraud verdict.</p>
         </details>
         <details className="method"><summary>All {dataset.reviews.length} supplied reviews</summary><ul className="review-list">{dataset.reviews.map(r => <ReviewEntry key={r.id} review={r} />)}</ul><p>This list shows original votes. Adjusted weights appear inside wording groups above.</p></details>

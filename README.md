@@ -4,11 +4,13 @@ Evidence behind care decisions. A local-first desktop browser-extension prototyp
 
 ## What works today
 
-The approved policy is verification first: imported and captured Maps reviews start unverified and contribute no verified votes. Both views lead with **Verified experience rating: Insufficient evidence**. Current acquisition routes provide no independently corroborated experiences, and imported verification flags cannot grant trust. No numerical verified rating or integrity penalty is produced from those inputs.
+**Strict suspicion filtering:** CareUnfold excludes all entries in qualifying full displayed-text duplicate groups (known original and unknown translation status kept separate; known translated text exempt), plus authors with 1–2 total reviews in known unedited same-day groups of at least four sample entries. The filter starts enabled, shows the original and estimated filtered sample ratings, and keeps every excluded original and reason available. Turn it off to restore the complete sample. It applies equally to positive and negative reviews and may exclude genuine experiences. Remaining reviews are **unverified**, not established as real. This changes the CareUnfold view only; Google's native reviews are unchanged. Relative Maps dates do not activate the exact-day rule.
+
+The approved policy is verification first: imported and captured Maps reviews start unverified and contribute no verified votes. Both views retain **Verified experience rating: Insufficient evidence** separately from the requested suspicion-based sample estimate. Current acquisition routes provide no independently corroborated experiences, and imported verification flags cannot grant trust. No numerical verified rating or integrity penalty is produced from those inputs.
 
 Expand **Unverified sample calculations** to compare the original sample average with the exact-wording sensitivity scenario. Each matching group contributes its mean stars as one sample vote; other reviews retain one sample vote. These calculations are separate from verification. The built-in example is entirely synthetic.
 
-**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. Signed-in installed Edge 0.2.3 testing captured multiple real listings, including 100-review samples; some listings stalled earlier. The 0.2.4 long-review traversal fix passes regression checks and still needs an installed live retest. See [the installed test record](research/edge-panel-verification.md) for scope and limitations.
+**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights in the duplicate sensitivity calculation; the separate strict filter uses sparse history only together with an exact-day cluster. Signed-in installed Edge 0.2.3 testing captured multiple real listings, including 100-review samples; some listings stalled earlier. The 0.2.4 long-review traversal fix passes regression checks and still needs an installed live retest. See [the installed test record](research/edge-panel-verification.md) for scope and limitations.
 
 ## Run and install
 
@@ -26,7 +28,7 @@ Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose
 To update an existing unpacked installation:
 
 1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
-2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.8).
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.9).
 3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
 
 For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.

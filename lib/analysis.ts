@@ -97,8 +97,24 @@ export function analyze(dataset: Dataset) {
   const adjustedTotal = independent.reduce((sum, r) => sum + r.rating, 0)
     + wordingGroups.reduce((sum, group) => sum + group.reduce((stars, r) => stars + r.rating, 0) / group.length, 0);
   const effectiveVotes = independent.length + wordingGroups.length;
+  // Strict suspicion scenario, not calibrated fraud labels. Apply regardless of stars.
+  const reasons = new Map<string, string[]>();
+  const exclude = (id: string, reason: string) => reasons.set(id, [...(reasons.get(id) ?? []), reason]);
+  for (const group of wordingGroups) if (group[0]!.translated !== true) {
+    for (const r of group) exclude(r.id, `Full displayed text matches ${group.length - 1} other sample entries (at least 40 characters).${r.translated === null ? ' Translation status is unknown; translation may explain the match.' : ' Reported as original text.'}`);
+  }
+  for (const [date, group] of dates) if (group.length >= 4) {
+    for (const r of group) if (r.reviewerReviewCount !== undefined && r.reviewerReviewCount <= 2) {
+      exclude(r.id, `Author has ${r.reviewerReviewCount} total reviews; ${group.length} unedited sample entries share ${date}.`);
+    }
+  }
+  const exclusions = [...reasons].map(([id, reasons]) => ({ id, reasons }));
+  const retained = dataset.reviews.filter(r => !reasons.has(r.id));
   return {
     findings,
+    exclusions,
+    retainedReviews: retained.length,
+    filteredRating: retained.length ? retained.reduce((sum, r) => sum + r.rating, 0) / retained.length : null,
     // Current acquisition routes supply no independently corroborated patient experiences.
     // Imported verification flags and linguistic patterns cannot grant verified votes.
     verifiedExperienceRating: null,

@@ -1,6 +1,20 @@
 import { expect, it } from 'vitest';
 import { parseHTML } from 'linkedom';
 import { isMapsPage, mapsPlaceIdentity, mapsRating, parseLoadedPlaces, readLoadedMapsPlaces, readLoadedMapsReviews } from './maps-dom';
+import { analyze } from './analysis';
+import { parseMapsCapture } from './maps-loader';
+
+it('filters actual parsed Maps duplicate text without inventing original-language or exact-date metadata', () => {
+  const text = 'Synthetic complete patient review for testing the displayed full-text match only.';
+  const { document } = parseHTML(`<html><body>${['a', 'b'].map(id => `<div class="jftiEf" data-review-id="${id}"><span class="kvMYJc" role="img" aria-label="5 stars"></span><div class="MyEned"><span class="wiI7pd">${text}</span></div><span class="rsqaWe">a month ago</span></div>`).join('')}</body></html>`);
+  const capture = parseMapsCapture({ reviews: readLoadedMapsReviews(document), sort: 'newest-confirmed', stopped: 'limit' }, 100);
+  expect(capture.reviews.every(review => review.translated === null && review.edited === null)).toBe(true);
+  const result = analyze({ name: 'Invented', source: 'google-maps', sampling: 'selected', reviews: capture.reviews });
+  expect(result.exclusions.map(review => review.id)).toEqual(['a', 'b']);
+  expect(result.filteredRating).toBeNull();
+  expect(result.exclusions[0]!.reasons).toHaveLength(1);
+  expect(result.exclusions[0]!.reasons[0]).toContain('Translation status is unknown');
+});
 
 it('accepts a supported place identity while rejecting unsafe and unrelated URLs', () => {
   const url = 'https://www.google.com/maps/place/Invented/data=!4m7!1s0x123:0x456!19sChIJexample?authuser=1&rclk=1#tracking';

@@ -12,6 +12,14 @@ Even confirmed genuine feedback describes respondents, whose experience may diff
 
 ## Required target and evidence
 
+### Approved target, 2 October 2026
+
+The user approved **patient experience with the individual doctor**, covering communication, time and follow-up, while keeping clinical quality separate. This resolves the intended subject of validation, not its measurement or evidence source. Registration is credential evidence; independently substantiated fabricated reviews are integrity evidence. Neither is a patient-experience response or a clinical-outcome measure.
+
+Before collecting or calculating an estimate, specify the eligible population, consultation period, exact experience questions and handling of unavailable follow-up. A patient who has not needed follow-up must not receive an invented follow-up score. Keep the three dimensions separate until their measurement and combination are agreed and evaluated; no weighting formula is approved yet. Google stars and Practo recommendation percentages remain comparators, not interchangeable reference answers.
+
+For each future reference release, require individual-doctor identity resolution, recruitment/invitation/completion counts, collection period, evidence provenance, applicable consent and reuse permission. Hold out doctors and periods before evaluating any candidate. Report sample selection and nonresponse alongside dimension errors and ranking uncertainty. No patient recruitment, uploaded evidence, new data retention or verification badge is authorized by this specification.
+
 1. **Define the target.** Keep platforms' native metrics separate: Google stars and Practo recommendation responses express different questions. Specify whose experience, which period and which clinical context an estimate covers. Doctor-level clinical outcomes are a separate target.
 2. **Establish access and coverage.** Obtain a supported, permitted route with source, sorting, missingness, filtering and total/denominator semantics recorded. A selected handful of displayed reviews is insufficient for a listing-wide corrected claim.
 3. **Obtain independent reference evidence.** Use a consented, representative patient-experience sample with a documented recruitment frame and response rate. Record the evidence behind any manipulation labels independently of the features a detector sees. Appointment proof alone is insufficient for either target.

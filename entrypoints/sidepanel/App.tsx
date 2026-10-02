@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { analyze, MAX_FILE_BYTES, parseDataset, type Dataset, type Review } from '../../lib/analysis';
 import { demo } from '../../lib/demo';
+import MapsComparison from './MapsComparison';
 
 const stars = (value: number | null) => value === null ? '—' : value.toFixed(2);
 function downloadExample() {
@@ -16,8 +17,8 @@ function ReviewEntry({ review, weight = 1 }: { review: Review; weight?: number }
   return <li className="review-entry">
     <div className="entry-heading"><strong>{review.id}</strong><span>{review.rating}/5 · {weight === 1 ? '1 vote' : `${weight.toFixed(3)} vote`}</span></div>
     <p>{review.text || 'No written text supplied.'}</p>
-    <small>{review.date ?? 'Date unknown'}{review.edited ? ' · edited (excluded from date pattern)' : ''}
-      {review.translated ? ' · translated' : ''}{review.truncated ? ' · incomplete text' : ''}</small>
+    <small>{review.date ?? 'Date unknown'}{review.edited === null ? ' · edit status unknown' : review.edited ? ' · edited (excluded from date pattern)' : ''}
+      {review.translated === null ? ' · translation status unknown' : review.translated ? ' · translated' : ''}{review.truncated === null ? ' · text completeness unknown' : review.truncated ? ' · incomplete text' : ''}</small>
   </li>;
 }
 
@@ -26,6 +27,7 @@ export default function App() {
   const [combine, setCombine] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [view, setView] = useState<'sample' | 'maps'>('sample');
   const input = useRef<HTMLInputElement>(null);
   const result = useMemo(() => dataset ? analyze(dataset) : null, [dataset]);
   const shownRating = combine ? result?.adjustedRating ?? null : result?.originalRating ?? null;
@@ -40,6 +42,7 @@ export default function App() {
     try {
       const raw: unknown = JSON.parse(await file.text());
       setDataset(parseDataset(raw));
+      setView('sample');
       setCombine(true);
     } catch (failure) {
       const message = failure instanceof SyntaxError ? 'The file is not valid JSON. Check its syntax or download the example.'
@@ -57,7 +60,9 @@ export default function App() {
       <button className="primary small" disabled={busy} onClick={() => input.current?.click()}>{busy ? 'Reading…' : 'Import JSON'}</button>
       <input ref={input} className="visually-hidden" type="file" accept=".json,application/json" aria-label="Import review JSON file" disabled={busy} onChange={importFile} />
     </header>
+    <nav className="view-switch" aria-label="Analysis source"><button aria-pressed={view === 'sample'} onClick={() => setView('sample')}>Demo / import</button><button aria-pressed={view === 'maps'} onClick={() => setView('maps')}>Google Maps</button></nav>
     <main id="main">
+      {view === 'maps' ? <MapsComparison /> : <>
       {error && <div className="error" role="alert"><strong>Import needs attention</strong><p>{error}</p></div>}
       {busy && <p role="status" className="status">Reading and checking your file on this device…</p>}
       {!dataset || !result ? <section className="empty">
@@ -101,7 +106,7 @@ export default function App() {
         </section>
         <details className="method"><summary>How this adjustment works</summary>
           <p>Matching uses the entire text after Unicode, case and whitespace normalization. A group must contain at least two entries with at least 40 characters each. Short praise and incomplete text are not combined.</p>
-          <p>Original and translated texts are grouped separately. Translated matches may reflect translation rather than the original authors’ wording.</p>
+          <p>Original, translated and unknown translation statuses are grouped separately. Translation may create matches. Unknown text completeness is excluded from grouping.</p>
           <p>Each group contributes its mean stars as one vote. Add those votes to all ungrouped stars, then divide by the number of effective votes. No entry is labeled fake.</p>
           <p>These prototype thresholds are not validated authenticity rules. This sample may differ from the rest of the listing; we do not calculate a listing-wide corrected rating.</p>
         </details>
@@ -114,10 +119,11 @@ export default function App() {
             <div><dt>Translated / edited</dt><dd>{result.translated} / {result.edited}</dd></div>
           </dl>
           <p>Reviewer totals do not reveal account age. Small totals, positive stars, polished language and reported-date concentrations do not reduce weight.</p>
-          <p>Dates are supplied by the import; we do not verify them. Four entries on the same reported day produce a context finding, not a fraud verdict.</p>
+          <p>Dates are supplied by the import; we do not verify them. Four entries with known unedited status on the same reported day produce a context finding, not a fraud verdict.</p>
         </details>
         <details className="method"><summary>All {dataset.reviews.length} supplied reviews</summary><ul className="review-list">{dataset.reviews.map(r => <ReviewEntry key={r.id} review={r} />)}</ul><p>This list shows original votes. Adjusted weights appear inside wording groups above.</p></details>
         <div className="sample-actions"><button disabled={busy} onClick={loadDemo}>Load demo</button><button disabled={busy} onClick={clear}>Clear sample</button></div>
+      </>}
       </>}
       <footer>
         <p><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M4 7V5a4 4 0 0 1 8 0v2M3 7h10v7H3zM8 10v2" /></svg>Local only. No uploads, tracking or saved review data.</p>

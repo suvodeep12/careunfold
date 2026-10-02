@@ -3,14 +3,15 @@ export type Review = {
   text: string;
   rating: number;
   date?: string;
+  reportedDate?: string;
   reviewerReviewCount?: number;
-  translated: boolean;
-  truncated: boolean;
-  edited: boolean;
+  translated: boolean | null;
+  truncated: boolean | null;
+  edited: boolean | null;
 };
 export type Dataset = {
   name: string;
-  source: 'synthetic' | 'user-import';
+  source: 'synthetic' | 'user-import' | 'google-maps';
   sampling: 'complete' | 'selected' | 'unknown';
   totalReviews?: number;
   reviews: Review[];
@@ -45,12 +46,12 @@ export function parseDataset(raw: unknown): Dataset {
     }
     if (v.reviewerReviewCount !== undefined && (!integer(v.reviewerReviewCount) || v.reviewerReviewCount < 1)) return fail(at + 'reviewerReviewCount must be a positive whole number; omit unknown counts.');
     for (const key of ['translated', 'truncated', 'edited']) {
-      if (typeof v[key] !== 'boolean') return fail(at + `set ${key} to true or false.`);
+      if (typeof v[key] !== 'boolean' && v[key] !== null) return fail(at + `set ${key} to true, false, or null for unknown.`);
     }
     // Only explicit schema fields enter the application; imported extras are discarded.
     return { id: v.id, text: v.text, rating: v.rating, date: v.date as string | undefined,
       reviewerReviewCount: v.reviewerReviewCount as number | undefined,
-      translated: v.translated as boolean, truncated: v.truncated as boolean, edited: v.edited as boolean };
+      translated: v.translated as boolean | null, truncated: v.truncated as boolean | null, edited: v.edited as boolean | null };
   });
   return { name: raw.name.trim(), source: raw.source, sampling: raw.sampling as Dataset['sampling'],
     totalReviews: raw.totalReviews as number | undefined, reviews };
@@ -66,14 +67,14 @@ export function analyze(dataset: Dataset) {
   for (const r of dataset.reviews) {
     const normalized = normalize(r.text);
     // Prototype threshold: exact normalized text, >=40 Unicode characters. No semantic/AI inference.
-    if (!r.truncated && [...normalized].length >= 40) {
-      const key = `${r.translated ? 'translated' : 'original'}:${normalized}`;
+    if (r.truncated === false && [...normalized].length >= 40) {
+      const key = `${r.translated === null ? 'unknown' : r.translated ? 'translated' : 'original'}:${normalized}`;
       const group = words.get(key) ?? [];
       group.push(r);
       words.set(key, group);
     }
     // Edited entries cannot establish the original publication day.
-    if (r.date && !r.edited) {
+    if (r.date && r.edited === false) {
       const group = dates.get(r.date) ?? [];
       group.push(r);
       dates.set(r.date, group);
@@ -82,7 +83,7 @@ export function analyze(dataset: Dataset) {
   const findings: Finding[] = [];
   for (const group of words.values()) if (group.length >= 2) findings.push({
     kind: 'wording', title: `${group.length} entries share the same wording`, ids: group.map(r => r.id),
-    explanation: `The full text matches after case, whitespace and Unicode normalization.${group[0]!.translated ? ' These are translated texts; translation may create similarities.' : ''} A shared template or common experience can also explain a match.`,
+    explanation: `The full displayed text matches after case, whitespace and Unicode normalization.${group[0]!.translated === null ? ' Translation status is unknown; these entries are kept separate from known original and translated texts.' : group[0]!.translated ? ' These are translated texts; translation may create similarities.' : ''} A shared template, translation or common experience can also explain a match.`,
   });
   for (const [date, group] of dates) if (group.length >= 4) findings.push({
     kind: 'dates', title: `${group.length} entries share a reported date`, ids: group.map(r => r.id),
@@ -105,7 +106,7 @@ export function analyze(dataset: Dataset) {
     wordingGroups: wordingGroups.length,
     knownCounts: knownCounts.length,
     lowCounts: knownCounts.filter(r => r.reviewerReviewCount! <= 2).length,
-    datedEntries: dataset.reviews.filter(r => r.date && !r.edited).length,
+    datedEntries: dataset.reviews.filter(r => r.date && r.edited === false).length,
     emptyText: dataset.reviews.filter(r => !r.text.trim()).length,
     translated: dataset.reviews.filter(r => r.translated).length,
     truncated: dataset.reviews.filter(r => r.truncated).length,

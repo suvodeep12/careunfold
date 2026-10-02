@@ -6,7 +6,7 @@ Evidence behind care decisions. A local-first desktop browser-extension prototyp
 
 Import a JSON review sample, compare its original average with an exact-wording adjustment, toggle the adjustment and inspect every affected entry. Each matching group contributes its mean stars as one vote. Other reviews keep one vote. The built-in example is entirely synthetic.
 
-**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. No live Google Maps integration is included.
+**This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. Automatic local Maps comparison controls are implemented; successful collection in an installed extension remains unverified.
 
 ## Run and install
 
@@ -46,15 +46,15 @@ The interface can download a complete synthetic example. Minimal valid input:
 }
 ```
 
-For real imports, set `source` to `user-import`. `sampling` accepts `complete`, `selected` or `unknown`; these are file-supplied declarations, not verified provenance. `complete` requires `totalReviews` equal to sample size. Otherwise the total is optional, but must be at least the sample size. Reviews need unique nonempty IDs, integer stars from 1 to 5, text and all three boolean flags. Optional `date` must be a real `YYYY-MM-DD`; optional `reviewerReviewCount` must be a positive integer. Omit unknown values. Limits: 2 MB, 1,000 reviews, 8,000 characters per text. Unknown fields are discarded. Invalid imports preserve the current sample.
+For real imports, set `source` to `user-import`. `sampling` accepts `complete`, `selected` or `unknown`; these are file-supplied declarations, not verified provenance. `complete` requires `totalReviews` equal to sample size. Otherwise the total is optional, but must be at least the sample size. Reviews need unique nonempty IDs, integer stars from 1 to 5, text and all three flags (`true`, `false` or `null` for unknown). Optional `date` must be a real `YYYY-MM-DD`; optional `reviewerReviewCount` must be a positive integer. Omit unknown values. Limits: 2 MB, 1,000 reviews, 8,000 characters per text. Unknown fields are discarded. Invalid imports preserve the current sample.
 
-Matching uses NFKC Unicode normalization, lowercase and collapsed whitespace. Only complete texts of at least 40 Unicode code points are grouped. Original and translated entries are grouped separately. A shared reported date among at least four unedited entries appears as context and never changes the rating. These thresholds are experimental rules, not validated authenticity signals.
+Matching uses NFKC Unicode normalization, lowercase and collapsed whitespace. Only complete texts of at least 40 Unicode code points are grouped. Original, translated and unknown-translation entries are grouped separately. Unknown text completeness is excluded from grouping. A shared reported date among at least four known unedited entries appears as context and never changes the rating. These thresholds are experimental rules, not validated authenticity signals.
 
 ## Privacy and evidence
 
 Processing runs locally. Imports stay in memory; reloading restores the demo. No backend, telemetry, uploads or review persistence. Review text is rendered as text.
 
-Live Maps integration is unfinished. Packaged result/review readers and background messaging exist, but the current interface cannot enable them. The manifest declares `sidePanel`, `scripting` and optional `https://www.google.com/maps/*` host access; site access is not granted automatically. Chrome host grants apply at origin level, while this code checks for Google Maps paths. No all-site, storage, debugger or network-interception permission is requested. A future explicit session requires a source tab and review limit, stops when the panel closes, and must reconnect after a page reload. Native integration and real review coverage remain unverified.
+For Maps comparison, open a Google Maps search, open CareUnfold, select **Google Maps**, choose the review depth and select **Enable on this Maps tab**. Grant the requested site access. It watches only already-loaded search cards and reuses one temporary inactive tab sequentially to attempt their reviews; it never scrolls search results. Review depth starts blank. The 100-newest choice is an engineering limit, not a representative sample; attempt-all still stops on a stall or a 90-second collection deadline. Unavailable evidence produces no adjusted rating. The manifest declares `sidePanel`, `scripting` and optional `https://www.google.com/maps/*` host access; site access is not granted automatically. Chrome host grants apply at origin level, while this code checks for Google Maps paths. No all-site, storage, debugger or network-interception permission is requested. Use **Stop** to end collection. Closing the panel or source tab, changing to Demo / import, or revoking site access also ends the session. Reconnect after a source-page reload. Activating the temporary tab hands it over to you and stops the batch. Native integration and real review coverage remain unverified.
 
 Read [the feasibility investigation](research/feasibility.md), [dataset audit](research/dataset-audit.md), and [GMR–PL inspection](research/gmr-inspection.md) before changing data acquisition or scoring. Raw downloaded data and generated builds are excluded from Git. No third-party dataset is redistributed here.
 

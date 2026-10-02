@@ -52,7 +52,7 @@ export default defineBackground(() => {
           completed.add(JSON.stringify(place));
           send({ kind: 'review', place, capture, error, capturedAt: new Date().toISOString() });
         }, controller.signal);
-        if (version === generation) send({ kind: 'idle' });
+        if (version === generation) send({ kind: 'idle', count: places.length });
       } catch (error) {
         if (version === generation) stop(error instanceof Error ? error.message : 'Review loading stopped.');
       }

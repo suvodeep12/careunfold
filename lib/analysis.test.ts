@@ -34,4 +34,12 @@ describe('review evidence boundaries', () => {
     const unique = analyze(dataset([review('a', { text: '' }), review('b', { text: 'Good doctor', rating: 3 })]));
     expect(unique.originalRating).toBe(unique.adjustedRating);
   });
+  it('preserves unknown flags without silently treating them as original, complete or unedited', () => {
+    const rows = [review('a', { translated: null }), review('b', { translated: null }), review('c'), review('d', { truncated: null }), review('e', { date: '2026-09-10', edited: null })];
+    const result = analyze(parseDataset(dataset(rows)));
+    expect(result.findings.find(f => f.ids.includes('a'))!.ids).toEqual(['a', 'b']);
+    expect(result.findings.find(f => f.ids.includes('a'))!.explanation).toContain('unknown');
+    expect(result.findings.some(f => f.ids.includes('d'))).toBe(false);
+    expect(result.datedEntries).toBe(0);
+  });
 });

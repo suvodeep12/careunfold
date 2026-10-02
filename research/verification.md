@@ -15,3 +15,9 @@ The user supplied a screenshot of CareUnfold 0.1.0 installed and enabled in Chro
 The browser automation download event timed out; example JSON download completion is not verified. Screen-reader behavior, complete keyboard traversal and physical-device testing are not verified. GitHub's Linux runner passed checks, tests, packaging and artifact upload for commit `ae50baf`; this CI evidence is separate from browser and clinical validation.
 
 The duplicate adjustment is a deterministic sensitivity scenario. There is no evidence yet of rating accuracy against representative independent patient experience, fraud-detection accuracy, clinical-quality prediction or improved doctor-selection outcomes. These remain requirements of the broader active goal.
+
+## Maps comparison implementation, 2 October 2026
+
+TypeScript, 19 tests and the production build pass. Required review depth has no default; the live view requests optional Google site access only on an explicit Enable action. Capture messages are validated at the extension boundary. Synthetic rendered comparisons verify separate Google listing, sample and adjusted values, unknown metadata and unavailable outcomes.
+
+Browser previews at 320 and 400 pixels showed the controls and synthetic waiting/captured/unavailable rows without horizontal overflow. The preview correctly rejects live collection outside an installed extension. These checks do not verify successful real Maps review collection, installed permission prompts, worker lifetime or background-tab behavior. Previous installed evidence above applies only to the earlier demo version.

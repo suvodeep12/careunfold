@@ -6,6 +6,26 @@ export type MapsCapture = {
   stopped: 'limit' | 'stalled' | 'timeout' | 'unavailable' | 'unsupported' | 'identity-changed';
 };
 
+export function parseMapsCapture(raw: unknown, limit: number): MapsCapture {
+  if (!raw || typeof raw !== 'object') throw new Error('Invalid review capture.');
+  const value = raw as Record<string, unknown>;
+  if (!Array.isArray(value.reviews) || value.reviews.length > limit || !['newest-confirmed', 'unknown'].includes(String(value.sort))
+    || !['limit', 'stalled', 'timeout', 'unavailable', 'unsupported', 'identity-changed'].includes(String(value.stopped))) throw new Error('Invalid review capture metadata.');
+  const ids = new Set<string>();
+  const reviews = value.reviews.map((r: Record<string, unknown>): MapsReview => {
+    if (!r || typeof r !== 'object' || typeof r.id !== 'string' || !r.id.trim() || r.id.length > 500 || ids.has(r.id)
+      || typeof r.text !== 'string' || r.text.length > 8000 || typeof r.rating !== 'number' || !Number.isInteger(r.rating) || r.rating < 1 || r.rating > 5
+      || (r.reportedDate !== undefined && (typeof r.reportedDate !== 'string' || r.reportedDate.length > 100))
+      || (r.reviewerReviewCount !== undefined && (typeof r.reviewerReviewCount !== 'number' || !Number.isSafeInteger(r.reviewerReviewCount) || r.reviewerReviewCount < 1))
+      || ['translated', 'truncated', 'edited'].some(key => r[key] !== null && typeof r[key] !== 'boolean')) throw new Error('Invalid captured review.');
+    ids.add(r.id);
+    return { id: r.id, text: r.text, rating: r.rating, reportedDate: r.reportedDate as string | undefined,
+      reviewerReviewCount: r.reviewerReviewCount as number | undefined, translated: r.translated as boolean | null,
+      truncated: r.truncated as boolean | null, edited: r.edited as boolean | null };
+  });
+  return { reviews, sort: value.sort as MapsCapture['sort'], stopped: value.stopped as MapsCapture['stopped'] };
+}
+
 function pause(ms: number, signal: AbortSignal) {
   signal.throwIfAborted();
   return new Promise<void>((resolve, reject) => {

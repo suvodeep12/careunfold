@@ -5,8 +5,8 @@ export default defineConfig({
   webExt: { disabled: true },
   manifest: {
     name: 'CareUnfold — review evidence',
-    description: 'Explore how repeated wording affects an imported review sample. Local processing only.',
-    version: '0.1.0',
+    description: 'Compare loaded Maps listings and imported review samples with transparent wording adjustments. Local processing only.',
+    version: '0.2.0',
     permissions: ['sidePanel', 'scripting'],
     optional_host_permissions: ['https://www.google.com/maps/*'],
     action: { default_title: 'Open CareUnfold' },

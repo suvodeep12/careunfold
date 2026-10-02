@@ -1,6 +1,6 @@
 import { browser } from 'wxt/browser';
 import { mapsPlaceIdentity, type MapsPlace } from './maps-dom';
-import type { MapsCapture } from './maps-loader';
+import { parseMapsCapture, type MapsCapture } from './maps-loader';
 
 function loaded(tabId: number, signal: AbortSignal) {
   signal.throwIfAborted();
@@ -68,7 +68,7 @@ export async function loadMapsBatch(
         const response = await browser.tabs.sendMessage(ownedTab, { kind: 'careunfold:reviews', key: place.key, limit });
         controller.signal.throwIfAborted();
         if (!response?.capture) throw new Error(response?.error ?? 'The review reader did not return a sample.');
-        report(place, response.capture as MapsCapture);
+        report(place, parseMapsCapture(response.capture, limit));
       } catch (error) {
         controller.signal.throwIfAborted();
         report(place, null, error instanceof Error ? error.message : 'Reviews unavailable.');

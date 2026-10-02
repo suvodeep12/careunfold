@@ -18,7 +18,11 @@ Read-only browser inspection observed eight loaded search cards with place links
 
 `lib/maps-dom.ts` reads only rendered search-feed cards and review-card markup. It validates place URLs, deduplicates listing/review identities, excludes owner replies and keeps relative date labels separate from calendar dates. Missing translation/edit markers remain unknown. English rating labels and the observed DOM classes are the current supported shape; other layouts/locales can remain unavailable. Synthetic DOM regression tests pass using the already-installed LinkeDOM package, now declared explicitly as a development dependency. No real review text is committed.
 
-The parsers are preparation only: no automatic tab queue, Maps permission grant, review scrolling or live side-panel comparison is shipped yet. No installed-extension verification or complete review acquisition is claimed. Platform access and rating validation remain unresolved.
+The packaged reader and sequential batch function are implemented but inactive. They require an explicit review limit, verify the listing identity, select the full Reviews tab, request Newest and require the page's sort confirmation. They expand patient text and scroll only a review card's ancestor inside the listing panel. A ten-second stall or ninety-second collection deadline returns a partial/unavailable outcome rather than declaring completeness. Changing listings discards the capture. Aborting closes only the owned tab; activating it hands it to the user and sends a stop message without closing or navigating it.
+
+Fourteen regression tests pass, including synthetic DOM checks for full-tab isolation, explicit limits, unavailable entries, cancellation and identity changes, plus mocked native-extension checks for one sequentially reused tab and user takeover. Browser inspection separately verified Google's Newest option and its visible confirmation. These checks do not prove that real review scrolling or native tab lifecycle works in an installed extension.
+
+No Maps permission grant, active automatic search observer or live side-panel comparison is shipped yet. The manifest still requests only `sidePanel`; no live loader can start from the current interface. No complete review acquisition is claimed. Platform access and rating validation remain unresolved.
 
 ## Optional bounded cloud pilot, not the production dependency
 

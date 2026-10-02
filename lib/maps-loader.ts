@@ -1,0 +1,93 @@
+import { mapsPlaceIdentity, readLoadedMapsReviews, type MapsReview } from './maps-dom';
+
+export type MapsCapture = {
+  reviews: MapsReview[];
+  sort: 'newest-confirmed' | 'unknown';
+  stopped: 'limit' | 'stalled' | 'timeout' | 'unavailable' | 'unsupported' | 'identity-changed';
+};
+
+function pause(ms: number, signal: AbortSignal) {
+  signal.throwIfAborted();
+  return new Promise<void>((resolve, reject) => {
+    const finish = () => { signal.removeEventListener('abort', abort); resolve(); };
+    const timer = setTimeout(finish, ms);
+    const abort = () => { clearTimeout(timer); signal.removeEventListener('abort', abort); reject(signal.reason); };
+    signal.addEventListener('abort', abort, { once: true });
+  });
+}
+
+// The caller supplies an explicit review limit; there is no implicit production default.
+// Only the owned review tab is changed. Search feeds are never scrolled.
+export async function collectMapsReviews(
+  doc: Document, currentUrl: () => string, expectedKey: string, limit: number, signal: AbortSignal,
+): Promise<MapsCapture> {
+  if (!Number.isSafeInteger(limit) || limit < 1) throw new Error('Provide a positive whole review limit.');
+  const result: MapsCapture = { reviews: [], sort: 'unknown', stopped: 'unavailable' };
+  const samePlace = () => mapsPlaceIdentity(currentUrl())?.key === expectedKey;
+  if (!samePlace()) return { ...result, stopped: 'identity-changed' };
+  signal.throwIfAborted();
+  const tab = doc.querySelector<HTMLButtonElement>('[role="main"] button[role="tab"][aria-label^="Reviews for "]');
+  if (!tab) return { ...result, stopped: 'unsupported' };
+  if (tab.getAttribute('aria-selected') !== 'true') tab.click();
+
+  // Wait for a selected full-review tab rather than treating overview previews as history.
+  const readyBy = Date.now() + 10_000;
+  while (Date.now() < readyBy) {
+    signal.throwIfAborted();
+    if (!samePlace()) return { ...result, stopped: 'identity-changed' };
+    if (tab.getAttribute('aria-selected') === 'true' && doc.querySelector('[role="main"] button[aria-label="Sort reviews"]')) break;
+    await pause(250, signal);
+  }
+  if (tab.getAttribute('aria-selected') !== 'true') return result;
+  const main = tab.closest<HTMLElement>('[role="main"]');
+  const sort = main?.querySelector<HTMLButtonElement>('button[aria-label="Sort reviews"]');
+  if (!main || !sort) return { ...result, stopped: 'unsupported' };
+  sort.click();
+  const sortBy = Date.now() + 5000;
+  let newest: HTMLElement | undefined;
+  while (Date.now() < sortBy && !newest) {
+    signal.throwIfAborted();
+    if (!samePlace()) return { ...result, stopped: 'identity-changed' };
+    newest = [...doc.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].find(e => e.textContent?.trim() === 'Newest');
+    if (!newest) await pause(250, signal);
+  }
+  if (!newest) return { ...result, stopped: 'unsupported' };
+  newest.click();
+  const confirmedBy = Date.now() + 5000;
+  while (Date.now() < confirmedBy) {
+    signal.throwIfAborted();
+    if (!samePlace()) return { ...result, stopped: 'identity-changed' };
+    const confirmed = [...doc.querySelectorAll('[aria-live]')].some(e => e.textContent?.trim() === 'The reviews are now sorted from newest to oldest.');
+    if (confirmed) { result.sort = 'newest-confirmed'; break; }
+    await pause(250, signal);
+  }
+  // A clicked control alone does not prove which sort produced the sample.
+  if (result.sort === 'unknown') return { ...result, stopped: 'unsupported' };
+
+  const reviews = new Map<string, MapsReview>();
+  const stopBy = Date.now() + 90_000;
+  let lastProgress = Date.now();
+  // ponytail: DOM layouts/locales can change; fail closed and add observed adapters when needed.
+  while (Date.now() < stopBy) {
+    signal.throwIfAborted();
+    if (!samePlace() || !main.isConnected || tab.getAttribute('aria-selected') !== 'true') return { ...result, reviews: [], stopped: 'identity-changed' };
+    // Expand patient text only; owner replies and translation controls are left alone.
+    for (const button of main.querySelectorAll<HTMLButtonElement>('.jftiEf .MyEned button[aria-expanded="false"][aria-label="See more"]')) button.click();
+    for (const review of readLoadedMapsReviews(main)) {
+      const old = reviews.get(review.id);
+      if (!old && reviews.size >= limit) break;
+      if (!old || old.text !== review.text || old.truncated !== review.truncated) lastProgress = Date.now();
+      reviews.set(review.id, review);
+    }
+    result.reviews = [...reviews.values()];
+    if (reviews.size >= limit) return { ...result, stopped: 'limit' };
+    if (Date.now() - lastProgress >= 10_000) return { ...result, stopped: reviews.size ? 'stalled' : 'unavailable' };
+    const card = main.querySelector<HTMLElement>('.jftiEf[data-review-id]');
+    // Scroll only a review card's scrollable ancestor inside this main panel.
+    let scroller = card?.parentElement;
+    while (scroller && main.contains(scroller) && scroller.scrollHeight <= scroller.clientHeight) scroller = scroller.parentElement;
+    if (scroller && main.contains(scroller)) scroller.scrollTop += Math.max(scroller.clientHeight - 40, 200);
+    await pause(750, signal);
+  }
+  return { ...result, stopped: 'timeout' };
+}

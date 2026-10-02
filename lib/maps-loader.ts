@@ -115,7 +115,12 @@ export async function collectMapsReviews(
     // Scroll only a review card's scrollable ancestor inside this main panel.
     let scroller = card?.parentElement;
     while (scroller && main.contains(scroller) && scroller.scrollHeight <= scroller.clientHeight) scroller = scroller.parentElement;
-    if (scroller && main.contains(scroller)) scroller.scrollTop += Math.max(scroller.clientHeight - 40, 200);
+    if (scroller && main.contains(scroller)) {
+      const before = scroller.scrollTop;
+      scroller.scrollTop += Math.max(scroller.clientHeight - 40, 200);
+      // Traversing loaded text is progress toward the next pagination boundary.
+      if (scroller.scrollTop > before) lastProgress = Date.now();
+    }
     await pause(750, signal);
   }
   return { ...result, stopped: 'timeout' };

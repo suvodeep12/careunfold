@@ -31,6 +31,31 @@ it('uses an explicit limit and reads full-review cards only after sort confirmat
   await expect(collectMapsReviews(doc, () => url, '0x1:0x2', 0, new AbortController().signal)).rejects.toThrow('limit');
 });
 
+it.each([{ limit: 2, stopped: 'limit' }, { limit: 3, stopped: 'stalled' }])('traverses tall reviews, then stops at $stopped', async ({ limit, stopped }) => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    const scroller = doc.createElement('div');
+    scroller.innerHTML = card('first');
+    doc.querySelector('[role="main"]')!.append(scroller);
+    let top = 0;
+    Object.defineProperties(scroller, {
+      clientHeight: { value: 200 },
+      scrollHeight: { value: 4200 },
+      scrollTop: {
+        get: () => top,
+        set: (value: number) => {
+          top = Math.min(value, 4000);
+          if (top === 4000 && !scroller.querySelector('[data-review-id="next"]')) scroller.insertAdjacentHTML('beforeend', card('next'));
+        },
+      },
+    });
+    const capture = collectMapsReviews(doc, () => url, '0x1:0x2', limit, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(await capture).toMatchObject({ stopped, reviews: [{ id: 'first' }, { id: 'next' }] });
+  } finally { vi.useRealTimers(); }
+});
+
 it('reports missing review entries and preserves cancellation', async () => {
   vi.useFakeTimers();
   try {

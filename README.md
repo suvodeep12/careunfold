@@ -52,7 +52,9 @@ Matching uses NFKC Unicode normalization, lowercase and collapsed whitespace. On
 
 ## Privacy and evidence
 
-Processing runs locally. Imports stay in memory; reloading restores the demo. No backend, telemetry, uploads or review persistence. The production manifest requests only `sidePanel`, with no host permissions. Review text is rendered as text.
+Processing runs locally. Imports stay in memory; reloading restores the demo. No backend, telemetry, uploads or review persistence. Review text is rendered as text.
+
+Live Maps integration is unfinished. Packaged result/review readers and background messaging exist, but the current interface cannot enable them. The manifest declares `sidePanel`, `scripting` and optional `https://www.google.com/maps/*` host access; site access is not granted automatically. Chrome host grants apply at origin level, while this code checks for Google Maps paths. No all-site, storage, debugger or network-interception permission is requested. A future explicit session requires a source tab and review limit, stops when the panel closes, and must reconnect after a page reload. Native integration and real review coverage remain unverified.
 
 Read [the feasibility investigation](research/feasibility.md), [dataset audit](research/dataset-audit.md), and [GMR–PL inspection](research/gmr-inspection.md) before changing data acquisition or scoring. Raw downloaded data and generated builds are excluded from Git. No third-party dataset is redistributed here.
 

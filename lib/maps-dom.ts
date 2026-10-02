@@ -4,6 +4,30 @@ export type MapsReview = {
   id: string; text: string; rating: number; reportedDate?: string; reviewerReviewCount?: number;
   translated: boolean | null; truncated: boolean | null; edited: boolean | null;
 };
+export const MAPS_SITE = 'https://www.google.com/maps/*';
+export function isMapsPage(href: string): boolean {
+  try {
+    const url = new URL(href);
+    return url.protocol === 'https:' && url.hostname === 'www.google.com' && !url.port && !url.username && !url.password
+      && (url.pathname === '/maps' || url.pathname.startsWith('/maps/'));
+  } catch { return false; }
+}
+
+// Extension messages are a trust boundary, even when the reader is packaged locally.
+export function parseLoadedPlaces(raw: unknown): MapsPlace[] {
+  if (!Array.isArray(raw) || raw.length > 1000) throw new Error('Unsupported loaded-result message.');
+  const places = new Map<string, MapsPlace>();
+  for (const value of raw) {
+    if (!value || typeof value !== 'object' || typeof value.name !== 'string' || !value.name.trim() || value.name.length > 500
+      || typeof value.url !== 'string' || value.url.length > 8000) throw new Error('Invalid loaded listing.');
+    const identity = mapsPlaceIdentity(value.url);
+    if (!identity || identity.key !== value.key) throw new Error('The loaded listing identity could not be verified.');
+    if (value.rating !== undefined && (typeof value.rating !== 'number' || !Number.isFinite(value.rating) || value.rating < 1 || value.rating > 5)) throw new Error('Invalid listing rating.');
+    if (value.totalReviews !== undefined && (!Number.isSafeInteger(value.totalReviews) || value.totalReviews < 0)) throw new Error('Invalid listing review count.');
+    places.set(identity.key, { ...identity, name: value.name.trim(), rating: value.rating, totalReviews: value.totalReviews });
+  }
+  return [...places.values()];
+}
 
 export function mapsPlaceIdentity(href: string): { key: string; url: string } | null {
   try {

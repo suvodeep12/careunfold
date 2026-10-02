@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { parseHTML } from 'linkedom';
-import { mapsPlaceIdentity, mapsRating, readLoadedMapsPlaces, readLoadedMapsReviews } from './maps-dom';
+import { isMapsPage, mapsPlaceIdentity, mapsRating, parseLoadedPlaces, readLoadedMapsPlaces, readLoadedMapsReviews } from './maps-dom';
 
 it('accepts a supported place identity while rejecting unsafe and unrelated URLs', () => {
   const url = 'https://www.google.com/maps/place/Invented/data=!4m7!1s0x123:0x456!19sChIJexample?authuser=1&rclk=1#tracking';
@@ -38,4 +38,14 @@ it('keeps unknown ratings and totals unknown instead of extracting unrelated num
   expect(mapsRating('4.8 stars 1,295 Reviews')).toEqual({ rating: 4.8, totalReviews: 1295 });
   expect(mapsRating('1 star')).toEqual({ rating: 1, totalReviews: undefined });
   for (const label of ['No reviews', 'Doctor 5 stars away', '6 stars', '5.9 stars', '4,8 Sterne']) expect(mapsRating(label).rating).toBeUndefined();
+});
+
+it('validates loaded-result messages before any browser navigation', () => {
+  const place = { key: '0x1:0x2', name: 'Invented clinic', url: 'https://www.google.com/maps/place/Invented/data=!1s0x1:0x2' };
+  expect(parseLoadedPlaces([place, place])).toHaveLength(1);
+  expect(parseLoadedPlaces([place])[0]!.rating).toBeUndefined();
+  for (const bad of [null, [null], [{ ...place, url: 'https://example.com/' }], [{ ...place, key: 'another' }], [{ ...place, rating: NaN }], [{ ...place, totalReviews: -1 }]]) expect(() => parseLoadedPlaces(bad)).toThrow();
+  expect(isMapsPage('https://www.google.com/maps/search/doctors')).toBe(true);
+  expect(isMapsPage('https://www.google.com/search?q=doctors')).toBe(false);
+  expect(isMapsPage('https://www.google.com.evil.test/maps/')).toBe(false);
 });

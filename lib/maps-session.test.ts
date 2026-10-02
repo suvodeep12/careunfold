@@ -1,0 +1,69 @@
+import { expect, it, vi } from 'vitest';
+import setupBackground from '../entrypoints/background';
+import type { MapsPlace } from './maps-dom';
+import type { MapsCapture } from './maps-loader';
+
+const mock = vi.hoisted(() => {
+  const event = () => {
+    const listeners = new Set<(...args: any[]) => void>();
+    return { addListener: (fn: (...args: any[]) => void) => listeners.add(fn), fire: (...args: any[]) => { for (const fn of [...listeners]) fn(...args); } };
+  };
+  return {
+    event,
+    sidePanel: { setPanelBehavior: vi.fn(async () => {}) },
+    runtime: { id: 'test', onConnect: event(), getURL: (path: string) => `chrome-extension://test${path}` },
+    permissions: { contains: vi.fn(async () => true), onRemoved: event() },
+    tabs: { get: vi.fn(async () => ({ url: 'https://www.google.com/maps/search/doctor' })), onRemoved: event() },
+    scripting: { executeScript: vi.fn(async () => []) },
+    batch: vi.fn(async (places: MapsPlace[], _limit: number, report: (place: MapsPlace, capture: MapsCapture | null) => void, _signal: AbortSignal) => {
+      for (const place of places) report(place, { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' });
+    }),
+  };
+});
+vi.mock('wxt/browser', () => ({ browser: mock }));
+vi.mock('wxt/utils/define-background', () => ({ defineBackground: (fn: unknown) => fn }));
+vi.mock('./maps-batch', () => ({ loadMapsBatch: mock.batch }));
+const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); };
+function port(name: string, sender: object) {
+  const p = { name, sender: { id: 'test', ...sender }, onMessage: mock.event(), onDisconnect: mock.event(), postMessage: vi.fn(), disconnect: vi.fn(() => p.onDisconnect.fire()) };
+  return p;
+}
+
+it('requires site access and explicit limits, watches changes and clears the session on disconnect', async () => {
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3 });
+  await flush();
+  expect(mock.scripting.executeScript).not.toHaveBeenCalled();
+  mock.permissions.contains.mockResolvedValueOnce(false);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 2 });
+  await flush();
+  expect(mock.scripting.executeScript).not.toHaveBeenCalled();
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 2 });
+  await flush();
+  expect(mock.scripting.executeScript).toHaveBeenCalledExactlyOnceWith({ target: { tabId: 3 }, files: ['/maps-results.js'], world: 'ISOLATED' });
+  const source = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(source);
+  const place = { key: '0x1:0x2', name: 'Invented', url: 'https://www.google.com/maps/place/Invented/data=!1s0x1:0x2' };
+  source.onMessage.fire({ kind: 'listings', places: [place] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(1);
+  expect(mock.batch.mock.calls[0]![0]).toEqual([{ ...place, rating: undefined, totalReviews: undefined }]);
+  expect(mock.batch.mock.calls[0]![1]).toBe(2);
+  source.onMessage.fire({ kind: 'listings', places: [place] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(1);
+  const second = { ...place, key: '0x3:0x4', url: 'https://www.google.com/maps/place/Second/data=!1s0x3:0x4' };
+  source.onMessage.fire({ kind: 'listings', places: [place, second] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(2);
+  expect(mock.batch.mock.calls[1]![0]).toEqual([{ ...second, rating: undefined, totalReviews: undefined }]);
+  expect(panel.postMessage).toHaveBeenCalledWith({ kind: 'listings', places: [{ ...place, rating: undefined, totalReviews: undefined }, { ...second, rating: undefined, totalReviews: undefined }], keepKeys: [place.key] });
+  panel.onDisconnect.fire();
+  expect(source.disconnect).toHaveBeenCalledTimes(1);
+  expect(mock.batch.mock.calls[1]![3].aborted).toBe(true);
+  const stranger = port('careunfold:results', { frameId: 0, tab: { id: 44 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(stranger);
+  expect(stranger.disconnect).toHaveBeenCalledTimes(1);
+});

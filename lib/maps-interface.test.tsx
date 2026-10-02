@@ -16,10 +16,12 @@ it('keeps Google aggregates separate from sample calculations and unavailable ev
   expect(ready).toContain('3.00');
   expect(ready).toContain('translation status unknown');
   expect(ready).toContain('not the doctor');
-  const unavailable: MapsCapture = { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' };
+  const unavailable: MapsCapture = { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable', problem: 'No review cards appeared within 10 seconds.' };
   const missing = renderToStaticMarkup(<Listing row={{ place, capture: unavailable }} />);
   expect(missing).toContain('No adjusted rating is calculated');
   expect(missing).not.toContain('0.00');
+  expect(missing).toContain('No review cards appeared within 10 seconds.');
+  expect(missing).toContain('Open this listing to inspect its reviews manually.');
   if (process.env.CAREUNFOLD_PREVIEW_FIXTURE === '1') {
     const stylesheet = readdirSync('.output/chrome-mv3/assets').find(file => file.endsWith('.css'))!;
     const html = renderToStaticMarkup(<div className="app"><main><div className="source-note synthetic"><strong>Synthetic verification fixture</strong><span>Invented clinics and reviews. No real provider is assessed.</span></div><ol className="maps-list"><Listing row={{ place: { ...place, name: 'Invented clinic — waiting' } }} /><Listing row={{ place: { ...place, name: 'Invented clinic — captured sample' }, capture }} /><Listing row={{ place: { ...place, name: 'Invented clinic — unavailable reviews' }, capture: unavailable }} /></ol></main></div>);

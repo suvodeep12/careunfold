@@ -4,11 +4,13 @@ export type MapsCapture = {
   reviews: MapsReview[];
   sort: 'newest-confirmed' | 'unknown';
   stopped: 'limit' | 'stalled' | 'timeout' | 'unavailable' | 'unsupported' | 'identity-changed';
+  problem?: string;
 };
 
 export function parseMapsCapture(raw: unknown, limit: number): MapsCapture {
   if (!raw || typeof raw !== 'object') throw new Error('Invalid review capture.');
   const value = raw as Record<string, unknown>;
+  if (value.problem !== undefined && (typeof value.problem !== 'string' || !value.problem.trim() || value.problem.length > 180)) throw new Error('Invalid capture problem.');
   if (!Array.isArray(value.reviews) || value.reviews.length > limit || !['newest-confirmed', 'unknown'].includes(String(value.sort))
     || !['limit', 'stalled', 'timeout', 'unavailable', 'unsupported', 'identity-changed'].includes(String(value.stopped))) throw new Error('Invalid review capture metadata.');
   const ids = new Set<string>();
@@ -23,7 +25,7 @@ export function parseMapsCapture(raw: unknown, limit: number): MapsCapture {
       reviewerReviewCount: r.reviewerReviewCount as number | undefined, translated: r.translated as boolean | null,
       truncated: r.truncated as boolean | null, edited: r.edited as boolean | null };
   });
-  return { reviews, sort: value.sort as MapsCapture['sort'], stopped: value.stopped as MapsCapture['stopped'] };
+  return { reviews, sort: value.sort as MapsCapture['sort'], stopped: value.stopped as MapsCapture['stopped'], ...(value.problem === undefined ? {} : { problem: value.problem as string }) };
 }
 
 function pause(ms: number, signal: AbortSignal) {
@@ -55,7 +57,7 @@ export async function collectMapsReviews(
     if (!samePlace()) return { ...result, stopped: 'identity-changed' };
     tab = findTab();
   }
-  if (!tab) return { ...result, stopped: 'unsupported' };
+  if (!tab) return { ...result, stopped: 'unsupported', problem: 'The Reviews tab did not appear within 10 seconds.' };
   if (tab.getAttribute('aria-selected') !== 'true') tab.click();
 
   // Wait for a selected full-review tab rather than treating overview previews as history.
@@ -67,10 +69,10 @@ export async function collectMapsReviews(
     if (tab.isConnected && tab.getAttribute('aria-selected') === 'true' && tab.closest('[role="main"]')?.querySelector('button[aria-label="Sort reviews"]')) break;
     await pause(250, signal);
   }
-  if (!tab.isConnected || tab.getAttribute('aria-selected') !== 'true') return result;
+  if (!tab.isConnected || tab.getAttribute('aria-selected') !== 'true') return { ...result, problem: 'The Reviews tab was unavailable or did not become selected within 10 seconds.' };
   const main = tab.closest<HTMLElement>('[role="main"]');
   const sort = main?.querySelector<HTMLButtonElement>('button[aria-label="Sort reviews"]');
-  if (!main || !sort) return { ...result, stopped: 'unsupported' };
+  if (!main || !sort) return { ...result, stopped: 'unsupported', problem: 'The review sorting control did not appear within 10 seconds.' };
   sort.click();
   const sortBy = Date.now() + 5000;
   let newest: HTMLElement | undefined;
@@ -80,7 +82,7 @@ export async function collectMapsReviews(
     newest = [...doc.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].find(e => e.textContent?.trim() === 'Newest');
     if (!newest) await pause(250, signal);
   }
-  if (!newest) return { ...result, stopped: 'unsupported' };
+  if (!newest) return { ...result, stopped: 'unsupported', problem: 'The Newest sorting option did not appear within 5 seconds.' };
   newest.click();
   const confirmedBy = Date.now() + 5000;
   while (Date.now() < confirmedBy) {
@@ -91,7 +93,7 @@ export async function collectMapsReviews(
     await pause(250, signal);
   }
   // A clicked control alone does not prove which sort produced the sample.
-  if (result.sort === 'unknown') return { ...result, stopped: 'unsupported' };
+  if (result.sort === 'unknown') return { ...result, stopped: 'unsupported', problem: 'Newest sorting was not confirmed within 5 seconds.' };
 
   const reviews = new Map<string, MapsReview>();
   const stopBy = Date.now() + 90_000;
@@ -110,7 +112,9 @@ export async function collectMapsReviews(
     }
     result.reviews = [...reviews.values()];
     if (reviews.size >= limit) return { ...result, stopped: 'limit' };
-    if (Date.now() - lastProgress >= 10_000) return { ...result, stopped: reviews.size ? 'stalled' : 'unavailable' };
+    if (Date.now() - lastProgress >= 10_000) return reviews.size ? { ...result, stopped: 'stalled' }
+      : { ...result, stopped: 'unavailable', problem: main.querySelector('.jftiEf[data-review-id]')
+        ? 'Review cards appeared, but no supported ratings were readable.' : 'No review cards appeared within 10 seconds.' };
     const card = main.querySelector<HTMLElement>('.jftiEf[data-review-id]');
     // Scroll only a review card's scrollable ancestor inside this main panel.
     let scroller = card?.parentElement;

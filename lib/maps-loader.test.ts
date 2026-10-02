@@ -16,6 +16,8 @@ it('validates capture messages and preserves unknown flags at the analysis bound
   const review = { id: 'test', text: 'Invented review', rating: 4, translated: null, truncated: false, edited: null };
   const capture = { reviews: [review], sort: 'newest-confirmed', stopped: 'limit' };
   expect(parseMapsCapture(capture, 1).reviews[0]!.translated).toBeNull();
+  expect(parseMapsCapture({ ...capture, problem: 'Review controls did not appear.' }, 1).problem).toBe('Review controls did not appear.');
+  for (const problem of [42, '', 'x'.repeat(181)]) expect(() => parseMapsCapture({ ...capture, problem }, 1)).toThrow();
   for (const bad of [null, { ...capture, sort: 'verified-real' }, { ...capture, reviews: [review, review] }, { ...capture, reviews: [{ ...review, rating: '5' }] }, { ...capture, reviews: [{ ...review, translated: undefined }] }]) expect(() => parseMapsCapture(bad, 2)).toThrow();
   expect(() => parseMapsCapture(capture, 0)).toThrow();
 });
@@ -61,7 +63,7 @@ it('reports missing review entries and preserves cancellation', async () => {
   try {
     const capture = collectMapsReviews(page(), () => url, '0x1:0x2', 2, new AbortController().signal);
     await vi.advanceTimersByTimeAsync(11_000);
-    expect(await capture).toEqual({ reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' });
+    expect(await capture).toEqual({ reviews: [], sort: 'newest-confirmed', stopped: 'unavailable', problem: 'No review cards appeared within 10 seconds.' });
     const controller = new AbortController();
     const aborted = expect(collectMapsReviews(page(), () => url, '0x1:0x2', 2, controller.signal)).rejects.toThrow('Stop requested');
     controller.abort(new Error('Stop requested'));
@@ -105,10 +107,34 @@ it('bounds the wait for missing controls and allows cancellation during that wai
     const { document } = parseHTML('<html><body></body></html>');
     const missing = collectMapsReviews(document, () => url, '0x1:0x2', 1, new AbortController().signal);
     await vi.advanceTimersByTimeAsync(10_000);
-    expect(await missing).toMatchObject({ sort: 'unknown', stopped: 'unsupported', reviews: [] });
+    expect(await missing).toMatchObject({ sort: 'unknown', stopped: 'unsupported', reviews: [], problem: 'The Reviews tab did not appear within 10 seconds.' });
     const controller = new AbortController();
     const aborted = expect(collectMapsReviews(document, () => url, '0x1:0x2', 1, controller.signal)).rejects.toThrow('Stop while loading');
     controller.abort(new Error('Stop while loading'));
     await aborted;
+  } finally { vi.useRealTimers(); }
+});
+
+it.each([
+  ['tab', 'The Reviews tab was unavailable or did not become selected within 10 seconds.'],
+  ['sort', 'The review sorting control did not appear within 10 seconds.'],
+  ['newest', 'The Newest sorting option did not appear within 5 seconds.'],
+  ['confirmation', 'Newest sorting was not confirmed within 5 seconds.'],
+  ['ratings', 'Review cards appeared, but no supported ratings were readable.'],
+])('identifies the failed %s step without inferring why it failed', async (step, problem) => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    if (step === 'tab') doc.querySelector('[role="tab"]')!.setAttribute('aria-selected', 'false');
+    if (step === 'sort') doc.querySelector('[aria-label="Sort reviews"]')!.remove();
+    if (step === 'newest') doc.querySelector('[role="menuitemradio"]')!.remove();
+    if (step === 'confirmation') {
+      const newest = doc.querySelector('[role="menuitemradio"]')!;
+      newest.replaceWith(newest.cloneNode(true));
+    }
+    if (step === 'ratings') doc.querySelector('[role="main"]')!.insertAdjacentHTML('beforeend', '<div class="jftiEf" data-review-id="unsupported"><span class="kvMYJc" role="img" aria-label="Unknown rating"></span></div>');
+    const capture = collectMapsReviews(doc, () => url, '0x1:0x2', 1, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(25_000);
+    expect(await capture).toMatchObject({ reviews: [], problem });
   } finally { vi.useRealTimers(); }
 });

@@ -7,7 +7,6 @@ export default defineConfig({
   manifest: {
     name: 'CareUnfold — review evidence',
     description: 'Compare loaded Maps listings and imported review samples with transparent wording adjustments. Local processing only.',
-    version: '0.2.5',
     permissions: ['sidePanel', 'scripting'],
     optional_host_permissions: MAPS_SITES,
     action: { default_title: 'Open CareUnfold' },

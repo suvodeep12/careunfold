@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
-    "zip": "wxt zip",
+    "zip": "wxt zip && node scripts/verify-package.mjs",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "postinstall": "wxt prepare"

@@ -45,3 +45,5 @@ The released files contain text rather than structured author IDs, timestamps, U
 Retain as an optional **noncommercial exploratory benchmark** for a locally evaluated text baseline, with hotel folds and duplicate grouping preserved. It offers better fabrication provenance than the Mendeley heuristic labels, but no permission or validation to label Indian doctor reviews fake, penalize providers, infer clinical competence or claim a true rating. Modern AI writing, Hindi/Hinglish, genuine templates and adversarial negative campaigns remain outside verified coverage. Target-domain independent evidence is still required by [rating-validation.md](rating-validation.md).
 
 The ZIP, locally written inspection script and aggregate JSON remain under ignored `data/ott/`. Run `python data/ott/inspect.py` to reproduce counts/hash without printing reviews. No raw review text is tracked or included in this note.
+
+A subsequent [local text baseline](ott-baseline.md) evaluates the supplied folds without saving or distributing weights. Its results do not change this corpus's target-domain or rights limitations.

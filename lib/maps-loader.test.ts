@@ -115,6 +115,29 @@ it('bounds the wait for missing controls and allows cancellation during that wai
   } finally { vi.useRealTimers(); }
 });
 
+it.each([false, true])('reports scroll geometry at a partial-sample stall (container present: %s)', async present => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    const wrapper = doc.createElement('div');
+    wrapper.innerHTML = Array.from({ length: 19 }, (_, i) => card(String(i))).join('');
+    Object.defineProperties(wrapper, {
+      clientHeight: { value: 200 }, scrollHeight: { value: present ? 1200 : 200 },
+      scrollTop: { get: () => present ? 1000 : 0, set: () => {} },
+    });
+    const main = doc.querySelector('[role="main"]')!;
+    Object.defineProperties(main, { clientHeight: { value: 200 }, scrollHeight: { value: 200 } });
+    main.append(wrapper);
+    const pending = collectMapsReviews(doc, () => url, '0x1:0x2', 100, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(11_000);
+    const result = await pending;
+    expect(result).toMatchObject({ sort: 'newest-confirmed', stopped: 'stalled', reviews: expect.any(Array) });
+    expect(result.reviews).toHaveLength(19);
+    expect(result.problem).toBe(`No progress for 10 seconds: 19 captured ratings, 19 rendered cards. ${present ? 'Scroll position 1000 of 1000 pixels.' : 'No scrollable review ancestor found.'}`);
+    expect(parseMapsCapture(result, 100).problem).toBe(result.problem);
+  } finally { vi.useRealTimers(); }
+});
+
 it.each([
   ['tab', 'The Reviews tab was unavailable or did not become selected within 10 seconds.'],
   ['sort', 'The review sorting control did not appear within 10 seconds.'],

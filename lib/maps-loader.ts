@@ -112,13 +112,14 @@ export async function collectMapsReviews(
     }
     result.reviews = [...reviews.values()];
     if (reviews.size >= limit) return { ...result, stopped: 'limit' };
-    if (Date.now() - lastProgress >= 10_000) return reviews.size ? { ...result, stopped: 'stalled' }
-      : { ...result, stopped: 'unavailable', problem: main.querySelector('.jftiEf[data-review-id]')
-        ? 'Review cards appeared, but no supported ratings were readable.' : 'No review cards appeared within 10 seconds.' };
     const card = main.querySelector<HTMLElement>('.jftiEf[data-review-id]');
     // Scroll only a review card's scrollable ancestor inside this main panel.
     let scroller = card?.parentElement;
     while (scroller && main.contains(scroller) && scroller.scrollHeight <= scroller.clientHeight) scroller = scroller.parentElement;
+    if (Date.now() - lastProgress >= 10_000) return reviews.size ? { ...result, stopped: 'stalled',
+      problem: `No progress for 10 seconds: ${reviews.size} captured ratings, ${main.querySelectorAll('.jftiEf[data-review-id]').length} rendered cards. ${scroller && main.contains(scroller) ? `Scroll position ${Math.round(scroller.scrollTop)} of ${Math.max(0, Math.round(scroller.scrollHeight - scroller.clientHeight))} pixels.` : 'No scrollable review ancestor found.'}` }
+      : { ...result, stopped: 'unavailable', problem: card
+        ? 'Review cards appeared, but no supported ratings were readable.' : 'No review cards appeared within 10 seconds.' };
     if (scroller && main.contains(scroller)) {
       const before = scroller.scrollTop;
       scroller.scrollTop += Math.max(scroller.clientHeight - 40, 200);

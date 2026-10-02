@@ -33,3 +33,5 @@ Evidence before verdicts; transparent sample coverage; privacy by default; legib
 
 ## Open Decisions
 The product name is CareUnfold: revealing the evidence behind care decisions. Initial exact-name web searches on 2026-10-01 returned no results; trademark and domain clearance remain unverified. Distribution, permitted live-access route and representative validation set remain undecided. User clarified a revised star rating and approved the transparent duplicate-text adjustment; that numerical comparison leads the interface.
+
+Independent validation recruitment remains undecided: on 2 October 2026 the user answered "not sure" about helping recruit consenting patients. That answer does not authorize recruitment or collecting patient information. Existing public-source research may inform the study, but no independent doctor-level reference sample has been established.

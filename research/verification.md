@@ -10,6 +10,8 @@ Captures at 400px and 320px showed readable panel layouts without horizontal ove
 
 ## Unverified or incomplete
 
-Actual Chrome/Edge installation and action-click side-panel opening have not been tested. The browser automation download event timed out; example JSON download completion is not verified. Screen-reader behavior, complete keyboard traversal and physical-device testing are not verified. CI results are separate from local checks.
+The user supplied a screenshot of CareUnfold 0.1.0 installed and enabled in Chromium, with its real extension side panel showing 4.29 adjusted and 4.58 original. The user subsequently confirmed that unchecking the adjustment changes the main rating to 4.58. This is user-supplied installed-extension evidence; it does not independently verify the toolbar-action path, Edge, imports or every other control in an installed extension.
+
+The browser automation download event timed out; example JSON download completion is not verified. Screen-reader behavior, complete keyboard traversal and physical-device testing are not verified. GitHub's Linux runner passed checks, tests, packaging and artifact upload for commit `ae50baf`; this CI evidence is separate from browser and clinical validation.
 
 The duplicate adjustment is a deterministic sensitivity scenario. There is no evidence yet of rating accuracy against representative independent patient experience, fraud-detection accuracy, clinical-quality prediction or improved doctor-selection outcomes. These remain requirements of the broader active goal.

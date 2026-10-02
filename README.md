@@ -67,3 +67,5 @@ The approved direction is evidence-based doctor comparison. Patient experience a
 See [AGENTS.md](AGENTS.md) for contributor workflow and claim boundaries. This repository currently provides no software license grant.
 
 See [verification evidence](research/verification.md) for checked behavior and remaining gaps, and [doctor-source checks](research/doctor-evidence.md) for the registration pilot. GitHub Actions runs type checks, tests and ZIP packaging on pushes and pull requests; a successful run retains the extension ZIP as an artifact.
+
+The final integration targets are Google Maps and/or Practo. Read [Practo access and score semantics](research/practo-feasibility.md) and [rating validation requirements](research/rating-validation.md) before implementing a live adapter. Practo recommendation percentages and Google star averages must retain their different meanings.

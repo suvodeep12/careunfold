@@ -14,6 +14,8 @@ People choosing doctors and clinics in India, initially on desktop Chrome/Edge.
 ## Product Purpose
 Help people choosing doctors in India compare evidence. The approved long-term direction separates estimated patient experience from verified registration, specialty and clinical-outcome evidence where available. Reviews alone cannot establish clinical quality or guarantee a correct choice. The first prototype inspects observable review patterns using synthetic demonstrations and imported reviews only.
 
+The requested final integration targets are Google Maps and/or Practo. The prototype is a milestone toward that goal, not proof of true doctor ratings or correct medical decisions. Platform access, metric semantics and real-world validation remain required work.
+
 ## Capabilities and Constraints
 No live Maps access in this release. User approved a revised sample rating: exact normalized duplicate-text groups receive one combined vote (the group's mean stars); other entries retain one vote. Display original average and affected entries. This is a sensitivity scenario, not a true clinic rating. No fraud probability, claim of purchased reviews, AI-authorship verdict, or inference about medical competence. Missing reviewer counts stay unknown. Repeated language and date concentration need alternative explanations. Imports remain in memory and are cleared on reload; no telemetry or upload. JSON schema is an implementation decision to document explicitly.
 

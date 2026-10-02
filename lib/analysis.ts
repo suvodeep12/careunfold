@@ -99,6 +99,11 @@ export function analyze(dataset: Dataset) {
   const effectiveVotes = independent.length + wordingGroups.length;
   return {
     findings,
+    // Current acquisition routes supply no independently corroborated patient experiences.
+    // Imported verification flags and linguistic patterns cannot grant verified votes.
+    verifiedExperienceRating: null,
+    corroboratedReviews: 0,
+    unverifiedReviews: dataset.reviews.length,
     originalRating: dataset.reviews.length ? originalTotal / dataset.reviews.length : null,
     adjustedRating: effectiveVotes ? adjustedTotal / effectiveVotes : null,
     effectiveVotes,

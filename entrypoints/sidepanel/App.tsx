@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { analyze, MAX_FILE_BYTES, parseDataset, type Dataset, type Review } from '../../lib/analysis';
 import { demo } from '../../lib/demo';
 import MapsComparison from './MapsComparison';
+import VerificationSummary from './VerificationSummary';
 
 const stars = (value: number | null) => value === null ? '—' : value.toFixed(2);
 function downloadExample() {
@@ -15,9 +16,9 @@ function downloadExample() {
 
 function ReviewEntry({ review, weight = 1 }: { review: Review; weight?: number }) {
   return <li className="review-entry">
-    <div className="entry-heading"><strong>{review.id}</strong><span>{review.rating}/5 · {weight === 1 ? '1 vote' : `${weight.toFixed(3)} vote`}</span></div>
+    <div className="entry-heading"><strong>{review.id}</strong><span>{review.rating}/5 · {weight === 1 ? '1 sample vote' : `${weight.toFixed(3)} sample vote`}</span></div>
     <p>{review.text || 'No written text supplied.'}</p>
-    <small>{review.date ?? 'Date unknown'}{review.edited === null ? ' · edit status unknown' : review.edited ? ' · edited (excluded from date pattern)' : ''}
+    <small>Unverified · {review.date ?? 'Date unknown'}{review.edited === null ? ' · edit status unknown' : review.edited ? ' · edited (excluded from date pattern)' : ''}
       {review.translated === null ? ' · translation status unknown' : review.translated ? ' · translated' : ''}{review.truncated === null ? ' · text completeness unknown' : review.truncated ? ' · incomplete text' : ''}</small>
   </li>;
 }
@@ -66,8 +67,8 @@ export default function App() {
       {error && <div className="error" role="alert"><strong>Import needs attention</strong><p>{error}</p></div>}
       {busy && <p role="status" className="status">Reading and checking your file on this device…</p>}
       {!dataset || !result ? <section className="empty">
-        <h1>See what changes the rating.</h1>
-        <p>Import a review sample to compare its average with a transparent adjustment for exact repeated wording.</p>
+        <h1>Inspect reviews before trusting them.</h1>
+        <p>Import a sample to inspect its evidence. Imported reviews remain unverified; sample averages do not become verified ratings.</p>
         <button className="primary" disabled={busy} onClick={() => input.current?.click()}>Import a JSON sample</button>
         <button className="secondary" disabled={busy} onClick={loadDemo}>Explore the synthetic example</button>
         <p className="muted">Up to 1,000 entries · 2 MB · processed locally</p>
@@ -80,6 +81,8 @@ export default function App() {
           <h1>{dataset.name}</h1>
           <p className="coverage">{dataset.reviews.length} {dataset.totalReviews !== undefined ? `of ${dataset.totalReviews} declared reviews` : 'reviews supplied; total unknown'} · {dataset.sampling === 'complete' ? 'Declared complete sample' : dataset.sampling === 'selected' ? 'Selected sample' : 'Selection method unknown'}</p>
         </section>
+        <VerificationSummary result={result} />
+        <details className="method sample-calculations"><summary>Unverified sample calculations</summary>
         <section className="rating-sheet" aria-labelledby="rating-title">
           <h2 id="rating-title">{combine ? 'Adjusted sample rating' : 'Original sample average'}</h2>
           <div className="rating-comparison" aria-live="polite" aria-atomic="true">
@@ -92,7 +95,8 @@ export default function App() {
           <label><input type="checkbox" checked={combine} onChange={e => setCombine(e.target.checked)} />Combine exact wording matches</label>
           <p>One combined vote per matching group. All other entries keep one vote.</p>
         </div>
-        <p className="boundary">This is a sample adjustment, not the clinic’s true rating or a measure of medical quality. Repeated wording can have legitimate explanations.</p>
+        <p className="boundary">These unverified sample calculations do not contribute to the verified experience rating. The duplicate adjustment is a sensitivity scenario, not a true rating or fake-review detector.</p>
+        </details>
         <section className="evidence" aria-labelledby="evidence-title">
           <div className="section-heading"><h2 id="evidence-title">Inspect the evidence</h2><span>{result.wordingGroups} wording {result.wordingGroups === 1 ? 'group' : 'groups'}</span></div>
           {!result.findings.length && <div className="no-pattern"><strong>No patterns met these rules.</strong><p>{dataset.reviews.length ? 'The adjusted average equals the original. This does not establish that the reviews are genuine.' : 'Import at least one rated review to calculate a sample average.'}</p></div>}

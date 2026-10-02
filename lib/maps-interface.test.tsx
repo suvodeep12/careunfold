@@ -1,11 +1,20 @@
 /// <reference types="node" />
 import { expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { parseHTML } from 'linkedom';
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { Listing } from '../entrypoints/sidepanel/MapsComparison';
+import App from '../entrypoints/sidepanel/App';
 import type { MapsCapture } from './maps-loader';
 
 vi.mock('wxt/browser', () => ({ browser: {} }));
+
+it('leads the demo/import view with verification status instead of a sample score', () => {
+  const { document } = parseHTML(renderToStaticMarkup(<App />));
+  expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('Insufficient evidence');
+  expect(document.querySelector('.sample-calculations')!.hasAttribute('open')).toBe(false);
+  expect(document.querySelector('.sample-calculations summary')!.textContent).toBe('Unverified sample calculations');
+});
 
 it('keeps Google aggregates separate from sample calculations and unavailable evidence', () => {
   const place = { key: '0x1:0x2', name: 'Invented clinic', url: 'https://www.google.com/maps/place/Invented/data=!1s0x1:0x2', rating: 4.8, totalReviews: 120 };
@@ -16,6 +25,11 @@ it('keeps Google aggregates separate from sample calculations and unavailable ev
   expect(ready).toContain('3.00');
   expect(ready).toContain('translation status unknown');
   expect(ready).toContain('not the doctor');
+  const { document } = parseHTML(ready);
+  expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('Insufficient evidence');
+  expect(document.querySelector('[aria-label="Review verification"]')!.textContent).toContain('0 independently corroborated');
+  expect(document.querySelector('details')!.hasAttribute('open')).toBe(false);
+  expect(document.querySelector('summary')!.textContent).toContain('Unverified sample calculations');
   const unavailable: MapsCapture = { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable', problem: 'No review cards appeared within 10 seconds.' };
   const missing = renderToStaticMarkup(<Listing row={{ place, capture: unavailable }} />);
   expect(missing).toContain('No adjusted rating is calculated');

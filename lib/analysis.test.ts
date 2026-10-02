@@ -3,6 +3,15 @@ import { analyze, parseDataset, type Dataset, type Review } from './analysis';
 const review = (id: string, extra: Partial<Review> = {}): Review => ({ id, text: 'The consultation was helpful and my questions were answered.', rating: 5, translated: false, truncated: false, edited: false, ...extra });
 const dataset = (reviews: Review[]): Dataset => ({ name: 'Synthetic test', source: 'synthetic', sampling: 'selected', reviews });
 describe('review evidence boundaries', () => {
+  it('gives uncorroborated imports and Maps reviews no verified-rating contribution', () => {
+    for (const source of ['synthetic', 'user-import', 'google-maps'] as const) {
+      const input = { ...dataset([review('a'), review('b', { rating: 1 })]), source };
+      expect(analyze(input)).toMatchObject({ verifiedExperienceRating: null, corroboratedReviews: 0, unverifiedReviews: 2 });
+    }
+    const forged = parseDataset({ ...dataset([]), reviews: [{ ...review('a'), verified: true, corroborated: true }], verifiedExperienceRating: 5 });
+    expect(forged.reviews[0]).not.toHaveProperty('verified');
+    expect(analyze(forged)).toMatchObject({ verifiedExperienceRating: null, corroboratedReviews: 0, unverifiedReviews: 1 });
+  });
   it('groups exact normalized text, but separates translations and skips truncated text', () => {
     const input = dataset([review('a'), review('b', { text: '  THE CONSULTATION WAS HELPFUL AND MY QUESTIONS WERE ANSWERED. ' }), review('c', { translated: true }), review('d', { truncated: true })]);
     expect(analyze(input).findings[0]!.ids).toEqual(['a', 'b']);

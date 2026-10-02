@@ -4,7 +4,9 @@ Evidence behind care decisions. A local-first desktop browser-extension prototyp
 
 ## What works today
 
-Import a JSON review sample, compare its original average with an exact-wording adjustment, toggle the adjustment and inspect every affected entry. Each matching group contributes its mean stars as one vote. Other reviews keep one vote. The built-in example is entirely synthetic.
+The approved policy is verification first: imported and captured Maps reviews start unverified and contribute no verified votes. Both views lead with **Verified experience rating: Insufficient evidence**. Current acquisition routes provide no independently corroborated experiences, and imported verification flags cannot grant trust. No numerical verified rating or integrity penalty is produced from those inputs.
+
+Expand **Unverified sample calculations** to compare the original sample average with the exact-wording sensitivity scenario. Each matching group contributes its mean stars as one sample vote; other reviews retain one sample vote. These calculations are separate from verification. The built-in example is entirely synthetic.
 
 **This is a sample sensitivity scenario, not a recovered true rating, fraud detector or measure of clinical quality.** Reviewer totals and writing style do not reduce weights. Signed-in installed Edge 0.2.3 testing captured multiple real listings, including 100-review samples; some listings stalled earlier. The 0.2.4 long-review traversal fix passes regression checks and still needs an installed live retest. See [the installed test record](research/edge-panel-verification.md) for scope and limitations.
 
@@ -24,7 +26,7 @@ Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose
 To update an existing unpacked installation:
 
 1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
-2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.7).
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.8).
 3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
 
 For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.

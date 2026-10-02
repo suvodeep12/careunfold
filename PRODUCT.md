@@ -32,6 +32,8 @@ The user authorized ML, neural networks or AI to help identify fake reviews. Thi
 Version 0.2.5 adds the user-approved `www.google.co.in` Maps domain alongside `www.google.com`. The same two-origin allowlist governs page validation, listing identities, manifest optional access, startup and revocation checks. Enable requests both optional origins from its user gesture before reading the source tab URL. Preserve each supported listing's origin and require Maps paths; do not use a wildcard for all Google country domains. Browser observation found 11 rendered cards on the user's India page. URL/message and component regressions pass; installed India-domain collection remains unverified pending reload and site access.
 
 ## Evidence on Hand
+Version 0.2.6 prefers the displayed search-card title over the accessible link label, which can append visited status. A regression verifies that changing only visited status leaves the parsed listing unchanged when the displayed title is available. This prevents visited metadata from invalidating the batch fingerprint; it does not establish the reason for the user's missing collection tab or verify installed collection. Panel status is pending.
+
 Research in research/ describes observational pilot listings and the GMR–PL audit. Neither supplies Indian-clinic truth labels. Demo content must be clearly synthetic and must not name real doctors.
 
 ## Product Principles

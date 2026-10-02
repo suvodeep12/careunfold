@@ -27,6 +27,13 @@ it('reads only loaded search cards and keeps distinct listing identities separat
   ]);
 });
 
+it('keeps loaded listings stable when Maps marks their links visited', () => {
+  const { document } = parseHTML(`<div role="feed"><div role="article"><a aria-label="Invented clinic" href="https://www.google.co.in/maps/place/Invented/data=!1s0x1:0x2"></a><div class="qBF1Pd">Invented clinic</div></div></div>`);
+  const before = readLoadedMapsPlaces(document);
+  document.querySelector('a')!.setAttribute('aria-label', 'Invented clinic · Visited link');
+  expect(readLoadedMapsPlaces(document)).toEqual(before);
+});
+
 it('excludes owner replies, deduplicates nested ids and preserves unknown review metadata', () => {
   const { document } = parseHTML(`<html><body>
     <div class="jftiEf" data-review-id="synthetic-a"><div data-review-id="synthetic-a">

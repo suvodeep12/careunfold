@@ -61,7 +61,8 @@ export function readLoadedMapsPlaces(root: ParentNode): MapsPlace[] {
   for (const article of root.querySelectorAll('[role="feed"] [role="article"]')) {
     const link = article.querySelector<HTMLAnchorElement>('a[href*="/maps/place/"][aria-label]');
     const identity = link ? mapsPlaceIdentity(link.href) : null;
-    const name = link?.getAttribute('aria-label')?.trim();
+    // The accessible link label can include visited status; the displayed title stays stable.
+    const name = article.querySelector('.qBF1Pd')?.textContent?.trim() || link?.getAttribute('aria-label')?.trim();
     if (!identity || !name || places.has(identity.key)) continue;
     const label = [...article.querySelectorAll('[role="img"][aria-label]')]
       .map(e => e.getAttribute('aria-label') ?? '').find(text => /^\d(?:\.\d+)?\s+stars?/i.test(text));

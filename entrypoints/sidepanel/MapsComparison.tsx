@@ -46,6 +46,7 @@ export default function MapsComparison() {
   const installed = location.protocol === 'chrome-extension:';
   const [depth, setDepth] = useState('');
   const [diagnostics, setDiagnostics] = useState(false);
+  const [visibleTest, setVisibleTest] = useState(false);
   const [status, setStatus] = useState('Choose a review limit, then enable a session on your Maps search tab.');
   const [error, setError] = useState('');
   const [active, setActive] = useState(false);
@@ -74,7 +75,7 @@ export default function MapsComparison() {
       } else if (message?.kind === 'watching') {
         setStarting(false); setActive(true); setStatus('Watching already-loaded results. Search results will never be scrolled automatically.');
       } else if (message?.kind === 'loading') setStatus(`Loading reviews for ${message.count} listings, one at a time…`);
-      else if (message?.kind === 'idle') setStatus(message.count ? 'Current batch finished. Watching for changes to loaded results.' : 'No supported search cards loaded. Search for doctors in your source Maps tab.');
+      else if (message?.kind === 'idle') setStatus(message.visibleTest ? 'Visible-window test finished. Stop this session before starting another test.' : message.count ? 'Current batch finished. Watching for changes to loaded results.' : 'No supported search cards loaded. Search for doctors in your source Maps tab.');
       else if (message?.kind === 'stopped') { finishPendingRows(); setStarting(false); setActive(false); setStatus(message.message); }
       else if (message?.kind === 'problem') { finishPendingRows(); setStarting(false); setActive(false); setError(message.message); }
     });
@@ -107,7 +108,7 @@ export default function MapsComparison() {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (attempt !== startup.current) return;
       if (tab?.id === undefined || !isMapsPage(tab.url ?? '')) throw new Error('Open a Google Maps search tab, then enable this session there.');
-      connection.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER, diagnostics });
+      connection.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER, diagnostics, visibleTest });
     } catch (failure) { if (attempt === startup.current) { setStarting(false); setError(failure instanceof Error ? failure.message : 'Maps could not start.'); } }
   }
   function stop() { startup.current++; port.current?.postMessage({ kind: 'stop' }); setActive(false); setStarting(false); }
@@ -118,6 +119,8 @@ export default function MapsComparison() {
     <p className="coverage">A stalled page or 90-second collection deadline can leave either option incomplete. No completeness is inferred.</p>
     <label><input type="checkbox" checked={diagnostics} disabled={active || starting} onChange={event => setDiagnostics(event.target.checked)} /> Show testing diagnostics on Maps</label>
     <p className="coverage">Opt-in read-only capture counts, sample calculations and stop reasons. Visible to Maps page scripts. No review text or author details. Removed when this session disconnects.</p>
+    <label><input type="checkbox" checked={visibleTest} disabled={active || starting} onChange={event => setVisibleTest(event.target.checked)} /> Test first listing in a visible window</label>
+    <p className="coverage">Diagnostic only: opens and focuses one temporary review window, then closes its review tab. Keep it visible and avoid interacting with it. Your Maps search stays intact; the reader and chosen limit are unchanged.</p>
     {!depth && <p id="review-limit-help" className="coverage">Choose a review limit above to enable collection. Nothing is loading yet.</p>}
     <div className="maps-actions"><button className="primary" disabled={!depth || active || starting} aria-busy={starting} aria-describedby={!depth ? 'review-limit-help' : undefined} onClick={start}>{starting ? 'Connecting…' : 'Enable on this Maps tab'}</button><button disabled={!active && !starting} onClick={stop}>Stop</button></div>
     <p className="boundary">Requires optional access to google.com and google.co.in. Chrome grants access to those Google origins; CareUnfold reads Maps paths only. One temporary review tab is reused. Closing this panel stops collection; reloading Maps requires reconnection.</p>

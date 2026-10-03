@@ -15,7 +15,7 @@ const mock = vi.hoisted(() => {
     permissions: { contains: vi.fn(async () => true), onRemoved: event() },
     tabs: { get: vi.fn(async () => ({ url: 'https://www.google.com/maps/search/doctor' })), onRemoved: event() },
     scripting: { executeScript: vi.fn(async () => []) },
-    batch: vi.fn(async (places: MapsPlace[], _limit: number, report: (place: MapsPlace, capture: MapsCapture | null) => void, _signal: AbortSignal) => {
+    batch: vi.fn(async (places: MapsPlace[], _limit: number, report: (place: MapsPlace, capture: MapsCapture | null) => void, _signal: AbortSignal, _visibleTest = false) => {
       for (const place of places) report(place, { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' });
     }),
   };
@@ -69,7 +69,29 @@ it('requires site access and explicit limits, watches changes and clears the ses
   await flush();
   expect(diagnosticSource.postMessage).toHaveBeenCalledWith(expect.objectContaining({ kind: 'diagnostics', event: 'review', row: expect.objectContaining({ captured: 0, stopped: 'unavailable' }) }));
   expect(JSON.stringify(diagnosticSource.postMessage.mock.calls)).not.toContain('"reviews":');
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 100, diagnostics: true, visibleTest: true });
+  await flush();
+  const visibleSource = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(visibleSource);
+  const beforeTest = mock.batch.mock.calls.length;
+  visibleSource.onMessage.fire({ kind: 'listings', places: [] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(beforeTest);
+  visibleSource.onMessage.fire({ kind: 'listings', places: [place, second] });
+  await flush();
+  expect(mock.batch.mock.calls[beforeTest]![0]).toEqual([{ ...place, rating: undefined, totalReviews: undefined }]);
+  expect(mock.batch.mock.calls[beforeTest]![4]).toBe(true);
+  expect(panel.postMessage).toHaveBeenCalledWith({ kind: 'idle', count: 1, visibleTest: true });
+  visibleSource.onMessage.fire({ kind: 'listings', places: [second] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(beforeTest + 1);
+  const afterTestMessages = visibleSource.postMessage.mock.calls.length;
+  visibleSource.onMessage.fire({ kind: 'listings', places: [] });
+  await flush();
+  expect(mock.batch).toHaveBeenCalledTimes(beforeTest + 1);
+  expect(visibleSource.postMessage).toHaveBeenCalledTimes(afterTestMessages);
   panel.onDisconnect.fire();
+  expect(visibleSource.disconnect).toHaveBeenCalledTimes(1);
   expect(diagnosticSource.disconnect).toHaveBeenCalledTimes(1);
   expect(source.disconnect).toHaveBeenCalledTimes(1);
   expect(mock.batch.mock.calls[1]![3].aborted).toBe(true);

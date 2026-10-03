@@ -115,6 +115,35 @@ it('bounds the wait for missing controls and allows cancellation during that wai
   } finally { vi.useRealTimers(); }
 });
 
+it.each([false, true])('retries an ignored Reviews click after readiness (control replaced: %s)', async replaced => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    const tab = doc.querySelector('[role="tab"]')!;
+    tab.setAttribute('aria-selected', 'false');
+    let ready = false;
+    let clicks = 0;
+    const select = () => {
+      clicks++;
+      if (ready) doc.querySelector('[role="tab"]')!.setAttribute('aria-selected', 'true');
+    };
+    tab.addEventListener('click', select);
+    doc.querySelector('[role="main"]')!.insertAdjacentHTML('beforeend', card('ready'));
+    const capture = collectMapsReviews(doc, () => url, '0x1:0x2', 1, new AbortController().signal);
+    setTimeout(() => {
+      ready = true;
+      if (replaced) {
+        const next = tab.cloneNode(true);
+        next.addEventListener('click', select);
+        tab.replaceWith(next);
+      }
+    }, 500);
+    await vi.advanceTimersByTimeAsync(11_000);
+    expect(await capture).toMatchObject({ sort: 'newest-confirmed', stopped: 'limit', reviews: [{ id: 'ready' }] });
+    expect(clicks).toBe(2);
+  } finally { vi.useRealTimers(); }
+});
+
 it.each([false, true])('reports scroll geometry at a partial-sample stall (container present: %s)', async present => {
   vi.useFakeTimers();
   try {

@@ -53,6 +53,11 @@ export default function MapsComparison() {
   const [rows, setRows] = useState<Row[]>([]);
   const port = useRef<ReturnType<typeof browser.runtime.connect> | null>(null);
   const startup = useRef(0);
+  function finishPendingRows() {
+    setRows(old => old.map(row => row.capture === undefined && !row.error
+      ? { ...row, error: 'Collection stopped before reviews were captured.' }
+      : row));
+  }
   function connectPanel() {
     if (port.current) return port.current;
     const connection = browser.runtime.connect({ name: 'careunfold:panel' });
@@ -70,12 +75,13 @@ export default function MapsComparison() {
         setStarting(false); setActive(true); setStatus('Watching already-loaded results. Search results will never be scrolled automatically.');
       } else if (message?.kind === 'loading') setStatus(`Loading reviews for ${message.count} listings, one at a time…`);
       else if (message?.kind === 'idle') setStatus(message.count ? 'Current batch finished. Watching for changes to loaded results.' : 'No supported search cards loaded. Search for doctors in your source Maps tab.');
-      else if (message?.kind === 'stopped') { setStarting(false); setActive(false); setStatus(message.message); }
-      else if (message?.kind === 'problem') { setStarting(false); setActive(false); setError(message.message); }
+      else if (message?.kind === 'stopped') { finishPendingRows(); setStarting(false); setActive(false); setStatus(message.message); }
+      else if (message?.kind === 'problem') { finishPendingRows(); setStarting(false); setActive(false); setError(message.message); }
     });
     connection.onDisconnect.addListener(() => {
       if (port.current !== connection) return;
       startup.current++;
+      finishPendingRows();
       port.current = null; setStarting(false); setActive(false); setStatus('The extension session disconnected. Enable a new session to reconnect.');
     });
     return connection;

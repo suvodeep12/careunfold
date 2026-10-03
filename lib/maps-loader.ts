@@ -58,14 +58,19 @@ export async function collectMapsReviews(
     tab = findTab();
   }
   if (!tab) return { ...result, stopped: 'unsupported', problem: 'The Reviews tab did not appear within 10 seconds.' };
-  if (tab.getAttribute('aria-selected') !== 'true') tab.click();
-
   // Wait for a selected full-review tab rather than treating overview previews as history.
   const readyBy = Date.now() + 10_000;
+  let lastClick = -Infinity;
   while (Date.now() < readyBy) {
     signal.throwIfAborted();
     if (!samePlace()) return { ...result, stopped: 'identity-changed' };
     tab = findTab() ?? tab;
+    // Maps can render a control before its handlers are ready or replace it during startup.
+    // Retry only an unselected, connected control within the existing bounded wait.
+    if (tab.isConnected && !tab.disabled && tab.getAttribute('aria-selected') !== 'true' && Date.now() - lastClick >= 1000) {
+      lastClick = Date.now();
+      tab.click();
+    }
     if (tab.isConnected && tab.getAttribute('aria-selected') === 'true' && tab.closest('[role="main"]')?.querySelector('button[aria-label="Sort reviews"]')) break;
     await pause(250, signal);
   }

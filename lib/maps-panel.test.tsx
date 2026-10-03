@@ -33,9 +33,13 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
   const root = createRoot(document.getElementById('root')!);
   try {
     await act(async () => root.render(<MapsComparison />));
+    expect(document.querySelector('button')!.disabled).toBe(true);
+    expect(document.querySelector('button')!.getAttribute('aria-busy')).toBe('false');
+    expect(document.getElementById('review-limit-help')?.textContent).toContain('Choose a review limit');
     const select = document.querySelector('select')!;
     Object.defineProperty(select, 'value', { configurable: true, writable: true, value: '100' });
     await act(async () => select.dispatchEvent(new window.Event('change', { bubbles: true })));
+    expect(document.getElementById('review-limit-help')).toBeNull();
     await act(async () => mock.ports[0].onDisconnect.fire());
     const enable = document.querySelector('button')!;
     expect(enable.disabled).toBe(false);
@@ -49,8 +53,10 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
     mock.permissions.request.mockImplementationOnce(() => new Promise(resolve => { grant = resolve; }));
     await act(async () => enable.click());
     const stop = document.querySelectorAll('button')[1]!;
+    expect(enable.getAttribute('aria-busy')).toBe('true');
     expect(stop.disabled).toBe(false);
     await act(async () => stop.click());
+    expect(enable.getAttribute('aria-busy')).toBe('false');
     await act(async () => grant(true));
     expect(mock.ports[1].postMessage).toHaveBeenCalledExactlyOnceWith({ kind: 'stop' });
     expect(mock.tabs.query).toHaveBeenCalledTimes(1);

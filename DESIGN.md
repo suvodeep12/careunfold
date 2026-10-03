@@ -171,7 +171,7 @@ Notes use the smallest radius, buttons and errors the control radius, the rating
 
 ## Components
 
-- **Buttons:** blue primary import action, paper secondary actions and an underlined text download action. Default controls have 40px minimum height; compact import uses 36px and text actions 32px. Hover changes fill; busy actions dim to 0.6 and show a wait cursor.
+- **Buttons:** blue primary import action, paper secondary actions and an underlined text download action. Default controls have 40px minimum height; compact import uses 36px and text actions 32px. Disabled controls dim to 0.6 and retain a normal cursor; only actions explicitly marked busy show a wait cursor. Explain unmet prerequisites beside disabled actions.
 - **Rating sheet:** a quiet blue field, large adjusted number, smaller original value behind a vertical divider, and coverage/effective-vote caption. Updates use a polite live region.
 - **Adjustment control:** native 17px checkbox, label and indented explanatory line. Its state changes the sample comparison, not provenance or context findings.
 - **Disclosures:** native details/summary for evidence, arithmetic and limitations. Finding chevrons rotate over 180ms ease-out; method disclosures use plus/minus indicators. Reduced-motion preference removes transitions.

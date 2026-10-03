@@ -4,6 +4,7 @@ import { demo } from '../../lib/demo';
 import MapsComparison from './MapsComparison';
 import VerificationSummary from './VerificationSummary';
 import StrictFilter from './StrictFilter';
+import ReviewerHistory from './ReviewerHistory';
 
 const stars = (value: number | null) => value === null ? '—' : value.toFixed(2);
 function downloadExample() {
@@ -21,6 +22,7 @@ function ReviewEntry({ review, weight = 1 }: { review: Review; weight?: number }
     <p>{review.text || 'No written text supplied.'}</p>
     <small>Unverified · {review.date ?? 'Date unknown'}{review.edited === null ? ' · edit status unknown' : review.edited ? ' · edited (excluded from date pattern)' : ''}
       {review.translated === null ? ' · translation status unknown' : review.translated ? ' · translated' : ''}{review.truncated === null ? ' · text completeness unknown' : review.truncated ? ' · incomplete text' : ''}</small>
+    <ReviewerHistory review={review} />
   </li>;
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { analyze, Review } from '../../lib/analysis';
+import ReviewerHistory from './ReviewerHistory';
 
 export default function StrictFilter({ reviews, result }: { reviews: Review[]; result: ReturnType<typeof analyze> }) {
   const [enabled, setEnabled] = useState(true);
@@ -24,11 +25,11 @@ export default function StrictFilter({ reviews, result }: { reviews: Review[]; r
     </details>
     <details className="method"><summary>{visible.length} {enabled ? 'retained' : 'original'} sample reviews</summary>
       {!visible.length && <p>{reviews.length ? 'All reviews are excluded by this scenario. Turn off the filter to inspect the original sample.' : 'No reviews have been captured or imported.'}</p>}
-      <ul className="review-list">{visible.map(review => <li className="review-entry" key={review.id}><div className="entry-heading"><strong>Sample entry {numbers.get(review.id)}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>Unverified · {review.date ?? review.reportedDate ?? 'Date unknown'}</small></li>)}</ul>
+      <ul className="review-list">{visible.map(review => <li className="review-entry" key={review.id}><div className="entry-heading"><strong>Sample entry {numbers.get(review.id)}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>Unverified · {review.date ?? review.reportedDate ?? 'Date unknown'}</small><ReviewerHistory review={review} /></li>)}</ul>
     </details>
     <details className="method"><summary>{result.exclusions.length} suspected reviews · reasons and originals</summary>
       {!result.exclusions.length && <p>No reviews met the strict rules. This does not establish authenticity.</p>}
-      <ul className="review-list">{reviews.filter(review => excluded.has(review.id)).map(review => <li className="review-entry" key={review.id}><div className="entry-heading"><strong>Sample entry {numbers.get(review.id)}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>{enabled ? 'Excluded on suspicion' : 'Included: filter off'} · not proven fake</small><ul>{excluded.get(review.id)!.map(reason => <li key={reason}>{reason}</li>)}</ul></li>)}</ul>
+      <ul className="review-list">{reviews.filter(review => excluded.has(review.id)).map(review => <li className="review-entry" key={review.id}><div className="entry-heading"><strong>Sample entry {numbers.get(review.id)}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>{enabled ? 'Excluded on suspicion' : 'Included: filter off'} · not proven fake</small><ReviewerHistory review={review} /><ul>{excluded.get(review.id)!.map(reason => <li key={reason}>{reason}</li>)}</ul></li>)}</ul>
     </details>
   </section>;
 }

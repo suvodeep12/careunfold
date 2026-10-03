@@ -5,6 +5,7 @@ import { isMapsPage, MAPS_SITES, parseLoadedPlaces, type MapsPlace } from '../..
 import type { MapsCapture } from '../../lib/maps-loader';
 import VerificationSummary from './VerificationSummary';
 import StrictFilter from './StrictFilter';
+import ReviewerHistory from './ReviewerHistory';
 
 type Row = { place: MapsPlace; capture?: MapsCapture | null; error?: string; capturedAt?: string };
 const stars = (n: number | null | undefined) => n == null ? '—' : n.toFixed(2);
@@ -34,7 +35,7 @@ export function Listing({ row }: { row: Row }) {
         <p>Exact full displayed texts of at least 40 characters share one mean-star vote. Known original, translated and unknown translation statuses stay separate. Incomplete or unknown-completeness text keeps its original vote. Other reviews each retain one vote.</p>
         {result.findings.map(f => <p key={f.ids.join(',')}>{f.title}. {f.explanation} Supporting sample entries: {f.ids.map(id => capture.reviews.findIndex(r => r.id === id) + 1).join(', ')}.</p>)}
         {!result.wordingGroups && <p>No exact-wording groups met the rule. An unchanged average does not establish authenticity.</p>}
-        <ul className="review-list">{capture.reviews.map((review, index) => <li key={review.id} className="review-entry"><div className="entry-heading"><strong>Sample entry {index + 1}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>Unverified · {review.reportedDate ?? 'Date unknown'} · {review.translated === null ? 'translation status unknown' : review.translated ? 'translated' : 'original'} · {review.truncated === null ? 'text completeness unknown' : review.truncated ? 'incomplete text' : 'complete displayed text'} · {review.edited === null ? 'edit status unknown' : review.edited ? 'edited' : 'not edited'}</small></li>)}</ul>
+        <ul className="review-list">{capture.reviews.map((review, index) => <li key={review.id} className="review-entry"><div className="entry-heading"><strong>Sample entry {index + 1}</strong><span>{review.rating}/5</span></div><p>{review.text || 'Rating without written text.'}</p><small>Unverified · {review.reportedDate ?? 'Date unknown'} · {review.translated === null ? 'translation status unknown' : review.translated ? 'translated' : 'original'} · {review.truncated === null ? 'text completeness unknown' : review.truncated ? 'incomplete text' : 'complete displayed text'} · {review.edited === null ? 'edit status unknown' : review.edited ? 'edited' : 'not edited'}</small><ReviewerHistory review={review} /></li>)}</ul>
       </div>}
     </>}
     </details>

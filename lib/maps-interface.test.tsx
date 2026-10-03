@@ -35,7 +35,7 @@ it('shows insufficient evidence and original escaped text when the strict filter
 
 it('keeps Google aggregates separate from sample calculations and unavailable evidence', () => {
   const place = { key: '0x1:0x2', name: 'Invented clinic', url: 'https://www.google.com/maps/place/Invented/data=!1s0x1:0x2', rating: 4.8, totalReviews: 120 };
-  const capture: MapsCapture = { sort: 'newest-confirmed', stopped: 'limit', reviews: [5, 5, 1].map((rating, i) => ({ id: String(i), rating, text: i < 2 ? 'Synthetic repeated text for testing the sample adjustment only.' : 'Different synthetic experience.', translated: null, truncated: false, edited: null })) };
+  const capture: MapsCapture = { sort: 'newest-confirmed', stopped: 'limit', reviews: [5, 5, 1].map((rating, i) => ({ id: String(i), rating, text: i < 2 ? 'Synthetic repeated text for testing the sample adjustment only.' : 'Different synthetic experience.', reviewerReviewCount: i === 0 ? 11 : undefined, translated: null, truncated: false, edited: null })) };
   const ready = renderToStaticMarkup(<Listing row={{ place, capture }} />);
   expect(ready).toContain('4.80');
   expect(ready).toContain('3.67');
@@ -51,6 +51,10 @@ it('keeps Google aggregates separate from sample calculations and unavailable ev
   expect(document.querySelector('.filter-result')!.textContent).toContain('1.00 / 5');
   expect(document.querySelector('.filter-result')!.textContent).toContain('1 of 3 sample reviews included · 2 excluded');
   expect(document.querySelector('[aria-label="Strict review filter"]')!.textContent).toContain('Translation status is unknown');
+  const entries = document.querySelector('[aria-label="Strict review filter"]')!.querySelectorAll('.review-entry');
+  expect(entries[0]!.textContent).toContain('Reported author review total: unknown');
+  expect(entries[1]!.textContent).toContain('Reported author review total: 11');
+  expect(entries[1]!.textContent).toContain('Review count before this entry and account age are unknown');
   const unavailable: MapsCapture = { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable', problem: 'No review cards appeared within 10 seconds.' };
   const missing = renderToStaticMarkup(<Listing row={{ place, capture: unavailable }} />);
   expect(missing).toContain('No adjusted rating is calculated');

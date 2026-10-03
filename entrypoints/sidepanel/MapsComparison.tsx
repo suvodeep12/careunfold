@@ -112,7 +112,8 @@ export default function MapsComparison() {
     <p className="coverage">A stalled page or 90-second collection deadline can leave either option incomplete. No completeness is inferred.</p>
     <label><input type="checkbox" checked={diagnostics} disabled={active || starting} onChange={event => setDiagnostics(event.target.checked)} /> Show testing diagnostics on Maps</label>
     <p className="coverage">Opt-in read-only capture counts, sample calculations and stop reasons. Visible to Maps page scripts. No review text or author details. Removed when this session disconnects.</p>
-    <div className="maps-actions"><button className="primary" disabled={!depth || active || starting} onClick={start}>{starting ? 'Connecting…' : 'Enable on this Maps tab'}</button><button disabled={!active && !starting} onClick={stop}>Stop</button></div>
+    {!depth && <p id="review-limit-help" className="coverage">Choose a review limit above to enable collection. Nothing is loading yet.</p>}
+    <div className="maps-actions"><button className="primary" disabled={!depth || active || starting} aria-busy={starting} aria-describedby={!depth ? 'review-limit-help' : undefined} onClick={start}>{starting ? 'Connecting…' : 'Enable on this Maps tab'}</button><button disabled={!active && !starting} onClick={stop}>Stop</button></div>
     <p className="boundary">Requires optional access to google.com and google.co.in. Chrome grants access to those Google origins; CareUnfold reads Maps paths only. One temporary review tab is reused. Closing this panel stops collection; reloading Maps requires reconnection.</p>
     {!installed && <p className="source-note">Browser preview only. Live collection requires the installed extension.</p>}
     {error && <div className="error" role="alert"><strong>Maps needs attention</strong><p>{error}</p></div>}

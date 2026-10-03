@@ -16,6 +16,8 @@ Expand **Unverified sample calculations** to compare the original sample average
 
 Requires Node.js 22 or newer supported by the installed toolchain.
 
+Packaged experimental builds are available from [GitHub Releases](https://github.com/suvodeep12/careunfold/releases). Download the extension ZIP under Assets, extract it, then load that folder as an unpacked extension. Release notes state the validation scope and remaining limitations.
+
 ```sh
 npm ci
 npm run check
@@ -28,7 +30,7 @@ Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose
 To update an existing unpacked installation:
 
 1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
-2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.12).
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.13).
 3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
 
 For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.

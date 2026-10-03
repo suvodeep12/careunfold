@@ -28,10 +28,12 @@ Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose
 To update an existing unpacked installation:
 
 1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
-2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.11).
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.12).
 3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
 
 For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.
+
+For browser-accessible testing, stop any existing session, check **Show testing diagnostics on Maps**, then enable the session. Expand **CareUnfold testing diagnostics** at the bottom-right of the source Maps page. It shows aggregate counts, original/filtered sample calculations and sorting/stop diagnostics; the filtered calculation always represents the exclusion rules enabled. It includes no review text or author details. The opt-in mirror is visible to Maps page scripts, uses no storage or server, and disappears on session disconnect.
 
 `npm run dev` starts WXT without launching a browser. Load `.output/chrome-mv3-dev` manually for extension development. To preview production UI without installing the extension, serve `.output/chrome-mv3` locally and open `sidepanel.html`. This preview does not test extension installation or the toolbar action.
 

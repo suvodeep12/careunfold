@@ -45,6 +45,7 @@ export function Listing({ row }: { row: Row }) {
 export default function MapsComparison() {
   const installed = location.protocol === 'chrome-extension:';
   const [depth, setDepth] = useState('');
+  const [diagnostics, setDiagnostics] = useState(false);
   const [status, setStatus] = useState('Choose a review limit, then enable a session on your Maps search tab.');
   const [error, setError] = useState('');
   const [active, setActive] = useState(false);
@@ -100,7 +101,7 @@ export default function MapsComparison() {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (attempt !== startup.current) return;
       if (tab?.id === undefined || !isMapsPage(tab.url ?? '')) throw new Error('Open a Google Maps search tab, then enable this session there.');
-      connection.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER });
+      connection.postMessage({ kind: 'start', sourceTabId: tab.id, limit: depth === '100' ? 100 : Number.MAX_SAFE_INTEGER, diagnostics });
     } catch (failure) { if (attempt === startup.current) { setStarting(false); setError(failure instanceof Error ? failure.message : 'Maps could not start.'); } }
   }
   function stop() { startup.current++; port.current?.postMessage({ kind: 'stop' }); setActive(false); setStarting(false); }
@@ -109,6 +110,8 @@ export default function MapsComparison() {
     <p className="boundary">Only independently corroborated reviews may contribute to a verified experience rating. Google aggregates and captured sample calculations remain separate, unverified evidence.</p>
     <label className="maps-depth" htmlFor="review-depth">Review limit per listing<select id="review-depth" value={depth} disabled={active || starting} onChange={event => setDepth(event.target.value)}><option value="">Choose a review limit</option><option value="100">Up to 100 newest reviews</option><option value="all">Attempt all available reviews</option></select></label>
     <p className="coverage">A stalled page or 90-second collection deadline can leave either option incomplete. No completeness is inferred.</p>
+    <label><input type="checkbox" checked={diagnostics} disabled={active || starting} onChange={event => setDiagnostics(event.target.checked)} /> Show testing diagnostics on Maps</label>
+    <p className="coverage">Opt-in read-only capture counts, sample calculations and stop reasons. Visible to Maps page scripts. No review text or author details. Removed when this session disconnects.</p>
     <div className="maps-actions"><button className="primary" disabled={!depth || active || starting} onClick={start}>{starting ? 'Connecting…' : 'Enable on this Maps tab'}</button><button disabled={!active && !starting} onClick={stop}>Stop</button></div>
     <p className="boundary">Requires optional access to google.com and google.co.in. Chrome grants access to those Google origins; CareUnfold reads Maps paths only. One temporary review tab is reused. Closing this panel stops collection; reloading Maps requires reconnection.</p>
     {!installed && <p className="source-note">Browser preview only. Live collection requires the installed extension.</p>}

@@ -2,6 +2,7 @@ import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
 import { isMapsPage, MAPS_SITES, parseLoadedPlaces, type MapsPlace } from '../lib/maps-dom';
 import { loadMapsBatch } from '../lib/maps-batch';
+import { diagnosticPlace, diagnosticReview, type DiagnosticEvent } from '../lib/maps-diagnostics';
 
 export default defineBackground(() => {
   browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => {
@@ -12,12 +13,14 @@ export default defineBackground(() => {
   let source: Port | null = null;
   let sourceId: number | undefined;
   let limit: number | undefined;
+  let diagnostics = false;
   let signature = '';
   let generation = 0;
   let controller: AbortController | null = null;
   let running: Promise<void> = Promise.resolve();
   let completed = new Set<string>();
   const send = (message: unknown) => { try { panel?.postMessage(message); } catch { /* Disconnected panels receive nothing. */ } };
+  const mirror = (message: DiagnosticEvent) => { if (diagnostics) { try { source?.postMessage(message); } catch { /* Disconnect clears the mirror. */ } } };
   const stop = (message: string) => {
     generation++;
     controller?.abort(new Error(message));
@@ -27,6 +30,7 @@ export default defineBackground(() => {
     old?.disconnect();
     sourceId = undefined;
     limit = undefined;
+    diagnostics = false;
     signature = '';
     completed.clear();
     send({ kind: 'stopped', message });
@@ -40,19 +44,26 @@ export default defineBackground(() => {
     const keepKeys = places.filter(p => completed.has(JSON.stringify(p))).map(p => p.key);
     completed = new Set(places.filter(p => keepKeys.includes(p.key)).map(p => JSON.stringify(p)));
     send({ kind: 'listings', places, keepKeys });
+    mirror({ kind: 'diagnostics', event: 'listings', places: places.map(diagnosticPlace), keepKeys });
     // Await cleanup before starting another batch: never create two owned review tabs.
     running = running.catch(() => {}).then(async () => {
       if (version !== generation || limit === undefined) return;
       const pending = places.filter(p => !completed.has(JSON.stringify(p)));
       controller = new AbortController();
       send({ kind: 'loading', count: pending.length });
+      mirror({ kind: 'diagnostics', event: 'status', status: `Loading ${pending.length} listings, one at a time.` });
       try {
         await loadMapsBatch(pending, limit, (place, capture, error) => {
           if (version !== generation) return;
           completed.add(JSON.stringify(place));
-          send({ kind: 'review', place, capture, error, capturedAt: new Date().toISOString() });
+          const capturedAt = new Date().toISOString();
+          send({ kind: 'review', place, capture, error, capturedAt });
+          mirror({ kind: 'diagnostics', event: 'review', row: diagnosticReview(place, capture, error, capturedAt) });
         }, controller.signal);
-        if (version === generation) send({ kind: 'idle', count: places.length });
+        if (version === generation) {
+          send({ kind: 'idle', count: places.length });
+          mirror({ kind: 'diagnostics', event: 'status', status: `Current batch finished: ${places.length} loaded listings. Watching for changes.` });
+        }
       } catch (error) {
         if (version === generation) stop(error instanceof Error ? error.message : 'Review loading stopped.');
       }
@@ -72,6 +83,7 @@ export default defineBackground(() => {
         stop('Starting a new Maps session.');
         sourceId = message.sourceTabId;
         limit = message.limit;
+        diagnostics = message.diagnostics === true;
         const version = generation;
         void (async () => {
           try {

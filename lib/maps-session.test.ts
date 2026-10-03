@@ -51,6 +51,7 @@ it('requires site access and explicit limits, watches changes and clears the ses
   expect(mock.batch).toHaveBeenCalledTimes(1);
   expect(mock.batch.mock.calls[0]![0]).toEqual([{ ...place, rating: undefined, totalReviews: undefined }]);
   expect(mock.batch.mock.calls[0]![1]).toBe(2);
+  expect(source.postMessage).not.toHaveBeenCalled();
   source.onMessage.fire({ kind: 'listings', places: [place] });
   await flush();
   expect(mock.batch).toHaveBeenCalledTimes(1);
@@ -60,7 +61,16 @@ it('requires site access and explicit limits, watches changes and clears the ses
   expect(mock.batch).toHaveBeenCalledTimes(2);
   expect(mock.batch.mock.calls[1]![0]).toEqual([{ ...second, rating: undefined, totalReviews: undefined }]);
   expect(panel.postMessage).toHaveBeenCalledWith({ kind: 'listings', places: [{ ...place, rating: undefined, totalReviews: undefined }, { ...second, rating: undefined, totalReviews: undefined }], keepKeys: [place.key] });
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 2, diagnostics: true });
+  await flush();
+  const diagnosticSource = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(diagnosticSource);
+  diagnosticSource.onMessage.fire({ kind: 'listings', places: [place] });
+  await flush();
+  expect(diagnosticSource.postMessage).toHaveBeenCalledWith(expect.objectContaining({ kind: 'diagnostics', event: 'review', row: expect.objectContaining({ captured: 0, stopped: 'unavailable' }) }));
+  expect(JSON.stringify(diagnosticSource.postMessage.mock.calls)).not.toContain('"reviews":');
   panel.onDisconnect.fire();
+  expect(diagnosticSource.disconnect).toHaveBeenCalledTimes(1);
   expect(source.disconnect).toHaveBeenCalledTimes(1);
   expect(mock.batch.mock.calls[1]![3].aborted).toBe(true);
   const stranger = port('careunfold:results', { frameId: 0, tab: { id: 44 }, url: 'https://www.google.com/maps/search/doctor' });

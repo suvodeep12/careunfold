@@ -37,3 +37,10 @@ Commit with a concise Conventional Commit subject. Push only to the user-approve
 ## Communication
 
 Lead with the result or next action. Number bounded steps when needed, cap lists at five items, and state progress during ongoing work. Use concrete time estimates when known. After changes, say what works and how it was checked. End with one action the user can complete in under two minutes.
+
+## GitHub workflow
+
+- Use `gh` to inspect existing issues, PRs, checks and releases before creating matching work. Track substantive bugs, evidence blockers and features as issues with reproducible evidence, acceptance criteria and current next action; update the existing issue as evidence changes.
+- Link behavior changes to their issue and use a focused PR for review. Close issues only when their acceptance criteria are verified; distinguish synthetic tests from installed-extension evidence. Tiny documentation-only changes may go directly to the approved branch.
+- Check Actions for the exact pushed commit. Publish tested extension ZIPs as versioned Releases with installation steps, validation scope and known limitations; mark experimental builds as prereleases. Verify the tag target and downloadable asset.
+- Choose GitHub features for concrete value: use Projects or milestones when coordination needs them, Discussions when there is an actual community conversation, and security tooling when actionable. Keep public issues, PRs, logs and assets free of credentials, raw reviews and patient details.

@@ -14,6 +14,7 @@ export default defineBackground(() => {
   let sourceId: number | undefined;
   let limit: number | undefined;
   let diagnostics = false;
+  let visibleTest = false;
   let signature = '';
   let generation = 0;
   let controller: AbortController | null = null;
@@ -31,11 +32,20 @@ export default defineBackground(() => {
     sourceId = undefined;
     limit = undefined;
     diagnostics = false;
+    visibleTest = false;
     signature = '';
     completed.clear();
     send({ kind: 'stopped', message });
   };
   const schedule = (places: MapsPlace[]) => {
+    // A diagnostic session tests the first loaded listing once, without further automatic batches.
+    if (visibleTest && signature) return;
+    if (visibleTest && !places.length) {
+      send({ kind: 'idle', count: 0 });
+      mirror({ kind: 'diagnostics', event: 'status', status: 'Waiting for the first loaded listing to test.' });
+      return;
+    }
+    if (visibleTest) places = places.slice(0, 1);
     const next = JSON.stringify(places);
     if (next === signature) return;
     signature = next;
@@ -59,10 +69,10 @@ export default defineBackground(() => {
           const capturedAt = new Date().toISOString();
           send({ kind: 'review', place, capture, error, capturedAt });
           mirror({ kind: 'diagnostics', event: 'review', row: diagnosticReview(place, capture, error, capturedAt) });
-        }, controller.signal);
+        }, controller.signal, visibleTest);
         if (version === generation) {
-          send({ kind: 'idle', count: places.length });
-          mirror({ kind: 'diagnostics', event: 'status', status: `Current batch finished: ${places.length} loaded listings. Watching for changes.` });
+          send({ kind: 'idle', count: places.length, visibleTest });
+          mirror({ kind: 'diagnostics', event: 'status', status: visibleTest ? 'Visible-window test finished. Stop this session before starting another test.' : `Current batch finished: ${places.length} loaded listings. Watching for changes.` });
         }
       } catch (error) {
         if (version === generation) stop(error instanceof Error ? error.message : 'Review loading stopped.');
@@ -84,6 +94,7 @@ export default defineBackground(() => {
         sourceId = message.sourceTabId;
         limit = message.limit;
         diagnostics = message.diagnostics === true;
+        visibleTest = message.visibleTest === true;
         const version = generation;
         void (async () => {
           try {

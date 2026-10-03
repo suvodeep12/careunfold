@@ -53,7 +53,7 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
     await act(async () => enable.click());
     expect(mock.runtime.connect).toHaveBeenCalledTimes(2);
     expect(mock.permissions.request).toHaveBeenCalledWith({ origins: ['https://www.google.com/maps/*', 'https://www.google.co.in/maps/*'] });
-    expect(mock.ports[1].postMessage).toHaveBeenCalledWith({ kind: 'start', sourceTabId: 3, limit: 100, diagnostics: false });
+    expect(mock.ports[1].postMessage).toHaveBeenCalledWith({ kind: 'start', sourceTabId: 3, limit: 100, diagnostics: false, visibleTest: false });
     await act(async () => mock.ports[1].onMessage.fire({ kind: 'stopped', message: 'Stopped.' }));
     for (const kind of ['stopped', 'problem']) {
       await act(async () => mock.ports[1].onMessage.fire({ kind: 'listings', places, keepKeys: [] }));

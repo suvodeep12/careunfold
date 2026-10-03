@@ -25,8 +25,9 @@ function loaded(tabId: number, signal: AbortSignal) {
 // No permanent state, extraction API, search navigation or additional-result scrolling.
 export async function loadMapsBatch(
   places: MapsPlace[], limit: number, report: (place: MapsPlace, capture: MapsCapture | null, error?: string) => void,
-  signal: AbortSignal,
+  signal: AbortSignal, visibleTest = false,
 ) {
+  if (visibleTest && places.length !== 1) throw new Error('The visible diagnostic requires exactly one listing.');
   if (!Number.isSafeInteger(limit) || limit < 1) throw new Error('Provide an explicit review limit.');
   const identities = places.map(place => mapsPlaceIdentity(place.url));
   if (identities.some((id, index) => !id || id.key !== places[index]!.key)) throw new Error('A listing has an unsupported identity.');
@@ -35,6 +36,7 @@ export async function loadMapsBatch(
   const controller = new AbortController();
   const cancel = () => controller.abort(signal.reason ?? new Error('Review loading stopped.'));
   const touched = ({ tabId }: { tabId: number }) => {
+    if (visibleTest) return; // This explicitly enabled experiment intentionally activates its tab.
     if (tabId !== ownedTab) return;
     // Hand the activated tab to the user; stop its reader without navigating or closing it.
     ownedTab = undefined;
@@ -58,10 +60,11 @@ export async function loadMapsBatch(
     const tab = await browser.tabs.create({ url: 'about:blank', active: false });
     ownedTab = tab.id;
     if (ownedTab === undefined) throw new Error('The temporary review tab could not be created.');
+    if (visibleTest) await browser.windows.create({ tabId: ownedTab, type: 'popup', focused: true, width: 720, height: 900 });
     for (const [index, place] of places.entries()) {
       controller.signal.throwIfAborted();
       try {
-        await browser.tabs.update(ownedTab, { url: identities[index]!.url, active: false });
+        await browser.tabs.update(ownedTab, { url: identities[index]!.url, active: visibleTest });
         await loaded(ownedTab, controller.signal);
         controller.signal.throwIfAborted();
         const current = await browser.tabs.get(ownedTab);

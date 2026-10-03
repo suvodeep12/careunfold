@@ -14,7 +14,7 @@ const mock = vi.hoisted(() => {
     get: vi.fn(async () => ({ status: 'complete', url })),
     remove: vi.fn(async () => {}),
     sendMessage: vi.fn(async () => ({ capture: { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' } })),
-  }, scripting: { executeScript: vi.fn(async () => []) } };
+  }, windows: { create: vi.fn(async () => ({ id: 8 })) }, scripting: { executeScript: vi.fn(async () => []) } };
 });
 vi.mock('wxt/browser', () => ({ browser: mock }));
 const places = [1, 2].map(i => ({ key: `0x${i}:0x9`, name: `Invented ${i}`, url: `https://www.google.com/maps/place/Invented/data=!1s0x${i}:0x9` }));
@@ -24,9 +24,22 @@ it('reuses one inactive owned tab for a sequential batch and closes only that ta
   const report = vi.fn();
   await loadMapsBatch(places, 2, report, new AbortController().signal);
   expect(mock.tabs.create).toHaveBeenCalledExactlyOnceWith({ url: 'about:blank', active: false });
+  expect(mock.windows.create).not.toHaveBeenCalled();
   expect(mock.tabs.update.mock.calls.map(([id, change]) => [id, change.url])).toEqual(places.map(p => [91, p.url]));
   expect(report.mock.calls.map(([p]) => p.key)).toEqual(places.map(p => p.key));
   expect(mock.tabs.remove).toHaveBeenCalledExactlyOnceWith(91);
+});
+
+it('tests exactly one listing in a visible window and closes only its owned tab', async () => {
+  vi.clearAllMocks();
+  mock.windows.create.mockImplementationOnce(async () => { mock.tabs.onActivated.fire({ tabId: 91 }); return { id: 8 }; });
+  const report = vi.fn();
+  await loadMapsBatch(places.slice(0, 1), 100, report, new AbortController().signal, true);
+  expect(mock.windows.create).toHaveBeenCalledExactlyOnceWith({ tabId: 91, type: 'popup', focused: true, width: 720, height: 900 });
+  expect(mock.tabs.update).toHaveBeenCalledExactlyOnceWith(91, { url: places[0]!.url, active: true });
+  expect(report).toHaveBeenCalledTimes(1);
+  expect(mock.tabs.remove).toHaveBeenCalledExactlyOnceWith(91);
+  await expect(loadMapsBatch(places, 100, report, new AbortController().signal, true)).rejects.toThrow('exactly one');
 });
 
 it('hands an activated worker tab to the user and never navigates to the next listing', async () => {
@@ -41,7 +54,7 @@ it('hands an activated worker tab to the user and never navigates to the next li
   expect(mock.tabs.remove).not.toHaveBeenCalled();
 });
 
-it('waits for asynchronous tab removal before a cancelled batch finishes', async () => {
+it.each([false, true])('waits for asynchronous tab removal before a cancelled batch finishes (visible: %s)', async visible => {
   vi.clearAllMocks();
   const controller = new AbortController();
   let release!: () => void;
@@ -51,10 +64,18 @@ it('waits for asynchronous tab removal before a cancelled batch finishes', async
     return { capture: { reviews: [], sort: 'newest-confirmed', stopped: 'unavailable' } };
   });
   let finished = false;
-  const batch = loadMapsBatch(places, 2, vi.fn(), controller.signal).catch(error => error).finally(() => { finished = true; });
+  const batch = loadMapsBatch(visible ? places.slice(0, 1) : places, 2, vi.fn(), controller.signal, visible).catch(error => error).finally(() => { finished = true; });
   await vi.waitFor(() => expect(mock.tabs.remove).toHaveBeenCalledExactlyOnceWith(91));
   await new Promise(resolve => setTimeout(resolve, 0));
   try { expect(finished).toBe(false); }
   finally { release(); await batch; }
   expect(mock.tabs.update).toHaveBeenCalledTimes(1);
+});
+
+it('removes its owned tab if the diagnostic window cannot open', async () => {
+  vi.clearAllMocks();
+  mock.windows.create.mockRejectedValueOnce(new Error('Window unavailable.'));
+  await expect(loadMapsBatch(places.slice(0, 1), 100, vi.fn(), new AbortController().signal, true)).rejects.toThrow('Window unavailable');
+  expect(mock.tabs.remove).toHaveBeenCalledExactlyOnceWith(91);
+  expect(mock.tabs.update).not.toHaveBeenCalled();
 });

@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import setupBackground from '../entrypoints/background';
 import type { MapsPlace } from './maps-dom';
 import type { MapsCapture } from './maps-loader';
@@ -60,11 +60,158 @@ beforeEach(() => {
   mock.tabs.onRemoved.clear();
   mock.permissions.onRemoved.clear();
 });
+afterEach(() => vi.useRealTimers());
 const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); };
 function port(name: string, sender: object) {
   const p = { name, sender: { id: 'test', ...sender }, onMessage: mock.event(), onDisconnect: mock.event(), postMessage: vi.fn(), disconnect: vi.fn(() => p.onDisconnect.fire()) };
   return p;
 }
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+function messages(panel: ReturnType<typeof port>) {
+  return panel.postMessage.mock.calls.map(([message]) => message);
+}
+
+function expectStartupTimeout(panel: ReturnType<typeof port>) {
+  const sent = messages(panel);
+  expect(sent).toContainEqual(expect.objectContaining({ kind: 'stopped', message: expect.stringContaining('20 seconds') }));
+  const problem = sent.find(message => message.kind === 'problem');
+  expect(problem?.message).toContain('20 seconds');
+  expect(problem?.message).toContain('respond');
+  expect(problem?.message.length).toBeLessThanOrEqual(180);
+}
+
+it.each([
+  ['an injection that completes without a source connection', false],
+  ['an injection that remains pending', true],
+])('ends startup when %s', async (_description, hangs) => {
+  vi.useFakeTimers();
+  if (hangs) mock.scripting.executeScript.mockImplementationOnce(() => new Promise(() => {}));
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  expect(mock.scripting.executeScript).toHaveBeenCalledOnce();
+
+  await vi.advanceTimersByTimeAsync(20_000);
+
+  expectStartupTimeout(panel);
+  const lateSource = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(lateSource);
+  expect(lateSource.disconnect).toHaveBeenCalledOnce();
+  expect(messages(panel).some(message => message.kind === 'watching')).toBe(false);
+});
+
+it('starts the deadline before permissions resolve and ignores their stale completion', async () => {
+  vi.useFakeTimers();
+  const permission = deferred<boolean>();
+  mock.permissions.contains.mockImplementationOnce(() => permission.promise);
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  expect(mock.tabs.get).not.toHaveBeenCalled();
+
+  await vi.advanceTimersByTimeAsync(20_000);
+  expectStartupTimeout(panel);
+  permission.resolve(true);
+  await flush();
+  expect(mock.tabs.get).not.toHaveBeenCalled();
+  expect(mock.scripting.executeScript).not.toHaveBeenCalled();
+});
+
+it('times out and disconnects a source port that never sends listings', async () => {
+  vi.useFakeTimers();
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  const source = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(source);
+  expect(messages(panel)).toContainEqual({ kind: 'watching', sourceTabId: 3 });
+
+  await vi.advanceTimersByTimeAsync(20_000);
+
+  expectStartupTimeout(panel);
+  expect(source.disconnect).toHaveBeenCalledOnce();
+  const afterTimeout = messages(panel).length;
+  source.onMessage.fire({ kind: 'listings', places: [] });
+  await flush();
+  expect(mock.batch).not.toHaveBeenCalled();
+  expect(messages(panel)).toHaveLength(afterTimeout);
+});
+
+it('clears the deadline after the first valid listings message, including an empty list', async () => {
+  vi.useFakeTimers();
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  const source = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(source);
+  expect(messages(panel)).toContainEqual({ kind: 'watching', sourceTabId: 3 });
+  source.onMessage.fire({ kind: 'listings', places: [] });
+  await flush();
+  expect(vi.getTimerCount()).toBe(0);
+
+  await vi.advanceTimersByTimeAsync(20_000);
+
+  expect(messages(panel).some(message => message.kind === 'problem' || (message.kind === 'stopped' && message.message.includes('20 seconds')))).toBe(false);
+  panel.onMessage.fire({ kind: 'stop' });
+});
+
+it.each(['Stop', 'panel disconnect'])('clears the startup deadline on %s', async action => {
+  vi.useFakeTimers();
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  if (action === 'Stop') panel.onMessage.fire({ kind: 'stop' });
+  else panel.onDisconnect.fire();
+  const afterCancel = messages(panel).length;
+  await vi.advanceTimersByTimeAsync(20_000);
+  expect(messages(panel).slice(afterCancel).some(message => message.kind === 'problem')).toBe(false);
+  const lateSource = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(lateSource);
+  expect(lateSource.disconnect).toHaveBeenCalledOnce();
+});
+
+it('clears the old deadline on a new start and ignores stale injection failure', async () => {
+  vi.useFakeTimers();
+  const oldInjection = deferred<never[]>();
+  mock.scripting.executeScript.mockImplementationOnce(() => oldInjection.promise);
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  await vi.advanceTimersByTimeAsync(10_000);
+
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  const source = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(source);
+  source.onMessage.fire({ kind: 'listings', places: [] });
+  await flush();
+  oldInjection.reject(new Error('Old session injection failed.'));
+  await flush();
+  expect(messages(panel).some(message => message.kind === 'problem' && message.message === 'Old session injection failed.')).toBe(false);
+
+  await vi.advanceTimersByTimeAsync(20_000);
+  expect(messages(panel).some(message => message.kind === 'problem' || (message.kind === 'stopped' && message.message.includes('20 seconds')))).toBe(false);
+  panel.onMessage.fire({ kind: 'stop' });
+});
 
 it('hands a native development panel session to the local console without native controls', async () => {
   (setupBackground as unknown as () => void)();

@@ -138,9 +138,9 @@ it('requires site access and explicit limits, watches changes and clears the ses
   expect(mock.batch).toHaveBeenCalledTimes(beforeTest);
   visibleSource.onMessage.fire({ kind: 'listings', places: [place, second] });
   await flush();
-  expect(mock.batch.mock.calls[beforeTest]![0]).toEqual([{ ...place, rating: undefined, totalReviews: undefined }]);
+  expect(mock.batch.mock.calls[beforeTest]![0]).toEqual([{ ...place, rating: undefined, totalReviews: undefined }, { ...second, rating: undefined, totalReviews: undefined }]);
   expect(mock.batch.mock.calls[beforeTest]![4]).toBe(true);
-  expect(panel.postMessage).toHaveBeenCalledWith({ kind: 'idle', count: 1, visibleTest: true });
+  expect(panel.postMessage).toHaveBeenCalledWith({ kind: 'idle', count: 2, visibleTest: true });
   visibleSource.onMessage.fire({ kind: 'listings', places: [second] });
   await flush();
   expect(mock.batch).toHaveBeenCalledTimes(beforeTest + 1);

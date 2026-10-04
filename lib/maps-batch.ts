@@ -21,13 +21,12 @@ function loaded(tabId: number, signal: AbortSignal) {
   });
 }
 
-// Call from the background only. One temporary tab per batch, sequential listing loads.
+// Call from the background only. One owned tab per batch, reused for sequential listing loads.
 // No permanent state, extraction API, search navigation or additional-result scrolling.
 export async function loadMapsBatch(
   places: MapsPlace[], limit: number, report: (place: MapsPlace, capture: MapsCapture | null, error?: string) => void,
   signal: AbortSignal, visibleTest = false,
 ) {
-  if (visibleTest && places.length !== 1) throw new Error('The visible diagnostic requires exactly one listing.');
   if (!Number.isSafeInteger(limit) || limit < 1) throw new Error('Provide an explicit review limit.');
   const identities = places.map(place => mapsPlaceIdentity(place.url));
   if (identities.some((id, index) => !id || id.key !== places[index]!.key)) throw new Error('A listing has an unsupported identity.');

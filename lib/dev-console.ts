@@ -15,7 +15,8 @@ export function mountDevConsole(ctx: ContentScriptContext, runtime: typeof brows
     <p>Choose an open Maps search. This page controls the installed development extension and shows aggregate results only.</p>
     <label for="source">Maps source tab</label><select id="source"><option value="">Discovering open Maps tabs…</option></select>
     <label for="limit">Review limit per listing</label><select id="limit"><option value="100">Up to 100 newest reviews</option><option value="all">Attempt all available reviews (bounded collection)</option></select>
-    <fieldset><label><input id="visible" type="checkbox"> Test first listing in a visible review window</label>
+    <fieldset><label><input id="visible" type="checkbox" aria-describedby="visible-help"> Test all loaded listings in a visible review window, once per session</label>
+    <small id="visible-help">One review tab is reused for the batch and closes when finished. The window may cover other work; keep it visible and avoid interacting.</small>
     <label><input id="resume" type="checkbox"> Rerun this test after development reloads</label></fieldset>
     <div class="actions"><button class="primary" id="run" disabled>Run test</button><button id="stop" disabled>Stop</button><button id="refresh">Refresh sources</button></div>
     <p class="status" role="status" id="status">Connecting to the development extension…</p>

@@ -128,6 +128,25 @@ it('starts the deadline before permissions resolve and ignores their stale compl
   expect(mock.scripting.executeScript).not.toHaveBeenCalled();
 });
 
+it('resets an existing source without sending a terminal stopped message for the new start', async () => {
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 20 });
+  await flush();
+  const oldSource = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(oldSource);
+  expect(messages(panel)).toContainEqual({ kind: 'watching', sourceTabId: 3 });
+
+  const messageCount = messages(panel).length;
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 100 });
+  await flush();
+
+  expect(oldSource.disconnect).toHaveBeenCalledOnce();
+  expect(messages(panel).slice(messageCount)).not.toContainEqual({ kind: 'stopped', message: 'Starting a new Maps session.' });
+  panel.onMessage.fire({ kind: 'stop' });
+});
+
 it('times out and disconnects a source port that never sends listings', async () => {
   vi.useFakeTimers();
   (setupBackground as unknown as () => void)();

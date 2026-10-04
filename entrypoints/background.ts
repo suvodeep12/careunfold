@@ -89,6 +89,12 @@ export default defineBackground(() => {
     if (port.sender?.id !== browser.runtime.id) { port.disconnect(); return; }
     const devPanel = import.meta.env.DEV && port.name === 'careunfold:dev-panel' && port.sender.frameId === 0 && port.sender.tab?.id !== undefined && port.sender.url === 'http://127.0.0.1:3000/careunfold-test';
     if (devPanel || (port.name === 'careunfold:panel' && !port.sender.tab && port.sender.url === browser.runtime.getURL('/sidepanel.html'))) {
+      if (devPanel && panel?.name === 'careunfold:panel') {
+        stop('The development console is taking over this test session.');
+        const previous = panel;
+        panel = null;
+        previous.disconnect();
+      }
       if (panel && panel !== port) { port.postMessage({ kind: 'problem', message: 'Another CareUnfold panel owns the current session.' }); port.disconnect(); return; }
       panel = port;
       port.onMessage.addListener(message => {

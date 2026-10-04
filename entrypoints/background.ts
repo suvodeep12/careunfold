@@ -44,14 +44,13 @@ export default defineBackground(() => {
     send({ kind: 'stopped', message });
   };
   const schedule = (places: MapsPlace[]) => {
-    // A diagnostic session tests the first loaded listing once, without further automatic batches.
+    // A visible diagnostic tests its first loaded set once, without further automatic batches.
     if (visibleTest && signature) return;
     if (visibleTest && !places.length) {
       send({ kind: 'idle', count: 0 });
-      mirror({ kind: 'diagnostics', event: 'status', status: 'Waiting for the first loaded listing to test.' });
+      mirror({ kind: 'diagnostics', event: 'status', status: 'Waiting for loaded listings to test.' });
       return;
     }
-    if (visibleTest) places = places.slice(0, 1);
     const next = JSON.stringify(places);
     if (next === signature) return;
     signature = next;
@@ -78,7 +77,7 @@ export default defineBackground(() => {
         }, controller.signal, visibleTest);
         if (version === generation) {
           send({ kind: 'idle', count: places.length, visibleTest });
-          mirror({ kind: 'diagnostics', event: 'status', status: visibleTest ? 'Visible-window test finished. Stop this session before starting another test.' : `Current batch finished: ${places.length} loaded listings. Watching for changes.` });
+          mirror({ kind: 'diagnostics', event: 'status', status: visibleTest ? `Visible-window batch finished for ${places.length} loaded listings. Stop this session before starting another test.` : `Current batch finished: ${places.length} loaded listings. Watching for changes.` });
         }
       } catch (error) {
         if (version === generation) stop(error instanceof Error ? error.message : 'Review loading stopped.');

@@ -33,6 +33,9 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
   const root = createRoot(document.getElementById('root')!);
   try {
     await act(async () => root.render(<MapsComparison />));
+    expect(document.querySelector('.maps-comparison')?.textContent).toContain('Test all loaded listings in a visible window once per session');
+    expect(document.getElementById('visible-window-help')?.textContent).toContain('closes it when finished');
+    expect(document.getElementById('visible-window-help')?.textContent).toContain('may cover other work');
     expect(document.querySelector('button')!.disabled).toBe(true);
     expect(document.querySelector('button')!.getAttribute('aria-busy')).toBe('false');
     expect(document.getElementById('review-limit-help')?.textContent).toContain('Choose a review limit');

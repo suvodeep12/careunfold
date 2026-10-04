@@ -174,3 +174,11 @@ The delayed-replacement and never-replaced fixtures both failed before the barri
 - Claiming the newly owned diagnostic page during startup reported visible document state and let the same corrected reader reach 100/1,977, newest-confirmed, limit, at 2026-10-04T10:56:25.772Z; sample mean 4.82. No manual scrolling was sent.
 
 The fixed sort contamination changes sample arithmetic without changing scoring. The attached result still does not establish why inactive rendering stalls, complete coverage, general multi-doctor reliability or review authenticity. Issue #15 addresses the sort error; issue #1 remains open for acquisition coverage. The user's search feed was not scrolled or navigated.
+
+## Corrected inactive batch and visible-batch candidate, 4 October 2026
+
+A later one-listing visible-window run reached 100/1,977, newest-confirmed and limit, at 2026-10-04T11:13:38.804Z before any successful browser-tool attachment. This contradicts a universal attachment requirement; rendering conditions remain uncontrolled.
+
+The next normal inactive batch finished all eleven already-loaded listings. Ten captured exactly ten ratings each, newest-confirmed and stalled at their scroll boundaries; the eleventh returned an empty sample, unknown sort and an unsupported diagnostic because the list did not refresh within the five-second sort barrier. Listed totals in source order were 1,977, 152, 665, 48, 240, 185, 451, 213, 302, 1,028 and 243. Terminal timestamps ranged from 11:15:03.573Z to 11:17:55.582Z. No owned tab was attached or manually scrolled during this batch. These results establish partial acquisition, not complete histories or rating validity.
+
+The user then approved an optional visible window processing the entire first loaded listing set once per session. Candidate 0.2.17 removes the one-listing restrictions while retaining one reused owned tab, unchanged reader/limits, cancellation and no additional search-result scrolling. Synthetic regressions cover multi-listing reuse, cleanup and suppression of a second visible batch. Installed multi-listing verification and rendered-interface inspection remain pending: the connected Edge inventory was readable, but binding the development console twice timed out during browser focus setup. No release or reliable pagination claim follows from this candidate.

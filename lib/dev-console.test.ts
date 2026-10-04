@@ -21,6 +21,10 @@ it('resumes only opted-in settings, keeps startup busy and clears reruns on Stop
   receive({ kind: 'sources', allowed: true, tabs: [{ id: 3, title: 'Invented search' }] });
   expect(port.postMessage).toHaveBeenCalledWith({ kind: 'start', sourceTabId: 3, limit: 100, visibleTest: false });
   const root = document.querySelector('main')!.shadowRoot!;
+  expect(root.querySelector('#visible')?.parentElement?.textContent).toContain('all loaded listings');
+  expect(root.querySelector('#visible')?.parentElement?.textContent).toContain('once per session');
+  expect(root.querySelector('#visible-help')?.textContent).toContain('closes when finished');
+  expect(root.querySelector('#visible-help')?.textContent).toContain('may cover other work');
   receive({ kind: 'stopped', message: 'Starting a new Maps session.' });
   expect(root.querySelector<HTMLButtonElement>('#run')!.disabled).toBe(true);
   expect(root.querySelector<HTMLButtonElement>('#refresh')!.disabled).toBe(true);

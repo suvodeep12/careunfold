@@ -41,7 +41,7 @@ For browser-accessible testing, stop any existing session, check **Show testing 
 
 Use the stable WXT development folder, rather than release ZIPs. No additional software or paid service is needed.
 
-1. Start `npm run dev`. It binds only to `127.0.0.1:3000` and fails clearly if that port is occupied. The development server must remain running; the coding agent can restart it when development resumes.
+1. When development resumes, run `.\scripts\start-dev.ps1` in PowerShell. It reuses the CareUnfold server when its setup page is already responding, or starts `npm run dev` in a hidden process and waits up to 30 seconds for `http://127.0.0.1:3000/careunfold-test`. It reports the serving process and URL; an unrelated listener on port 3000 produces an error without stopping that process.
 2. Once, disable the old packaged CareUnfold installation and load `.output/chrome-mv3-dev` through Edge's **Load unpacked** control. Keep the browser automation connection enabled. Developer builds use WXT's automatic rebuild/reload support.
 3. Once, open the development extension side panel on Maps, choose a review depth and enable Maps site access. Connecting the local development console automatically stops and releases that native-panel test session; no manual panel closure is needed. A second console still cannot displace an existing console.
 4. Open [the local test console](http://127.0.0.1:3000/careunfold-test), refresh sources, select the intended Maps search and review limit, optionally enable **Rerun this test after development reloads**, and run. The agent can operate these page controls and inspect aggregate results directly.

@@ -3,26 +3,48 @@ import { parseHTML } from 'linkedom';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import MapsComparison from '../entrypoints/sidepanel/MapsComparison';
+import setupBackground from '../entrypoints/background';
 
 const mock = vi.hoisted(() => {
   const event = () => {
     const listeners = new Set<(...args: any[]) => void>();
-    return { addListener: (fn: (...args: any[]) => void) => listeners.add(fn), fire: (...args: any[]) => { for (const fn of [...listeners]) fn(...args); } };
+    return { addListener: (fn: (...args: any[]) => void) => listeners.add(fn), clear: () => listeners.clear(), fire: (...args: any[]) => { for (const fn of [...listeners]) fn(...args); } };
   };
   const ports: any[] = [];
+  const servers: any[] = [];
+  const runtime: any = {
+    id: 'test',
+    onConnect: event(),
+    getURL: (path: string) => `chrome-extension://test${path}`,
+    connect: vi.fn(({ name }: { name: string }) => {
+      const toClient = event();
+      const toServer = event();
+      const client: any = { name, onMessage: toClient, onDisconnect: event(), postMessage: vi.fn((message: any) => toServer.fire(message)), disconnect: vi.fn() };
+      const sender = name === 'careunfold:results'
+        ? { id: 'test', frameId: 0, tab: { id: 3 }, url: 'https://www.google.co.in/maps/search/doctor' }
+        : { id: 'test', url: 'chrome-extension://test/sidepanel.html' };
+      const server: any = { name, sender, onMessage: toServer, onDisconnect: event(), postMessage: vi.fn((message: any) => toClient.fire(message)), disconnect: vi.fn() };
+      client.disconnect.mockImplementation(() => { client.onDisconnect.fire(); server.onDisconnect.fire(); });
+      server.disconnect.mockImplementation(() => { client.onDisconnect.fire(); server.onDisconnect.fire(); });
+      ports.push(client);
+      servers.push(server);
+      runtime.onConnect.fire(server);
+      return client;
+    }),
+  };
   return {
     ports,
-    runtime: { connect: vi.fn(() => {
-      const port = { onMessage: event(), onDisconnect: event(), postMessage: vi.fn(), disconnect: vi.fn() };
-      ports.push(port);
-      return port;
-    }) },
-    permissions: { request: vi.fn(async () => true) },
-    tabs: { query: vi.fn(async () => [{ id: 3, url: 'https://www.google.co.in/maps/search/doctor' }]) },
+    servers,
+    runtime,
+    permissions: { request: vi.fn(async () => true), contains: vi.fn(async () => true), onRemoved: event() },
+    tabs: { query: vi.fn(async () => [{ id: 3, url: 'https://www.google.co.in/maps/search/doctor' }]), get: vi.fn(async () => ({ url: 'https://www.google.co.in/maps/search/doctor' })), onRemoved: event() },
+    sidePanel: { setPanelBehavior: vi.fn(async () => {}) },
+    scripting: { executeScript: vi.fn(async () => []) },
   };
 });
 vi.mock('wxt/browser', () => ({ browser: mock }));
-afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); mock.ports.length = 0; });
+vi.mock('wxt/utils/define-background', () => ({ defineBackground: (fn: unknown) => fn }));
+afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); mock.ports.length = 0; mock.servers.length = 0; mock.runtime.onConnect.clear(); mock.permissions.onRemoved.clear(); mock.tabs.onRemoved.clear(); });
 
 it('reconnects an idle disconnected panel when the user enables Maps', async () => {
   const { window, document } = parseHTML('<html><body><div id="root"></div></body></html>');
@@ -84,5 +106,47 @@ it('reconnects an idle disconnected panel when the user enables Maps', async () 
     await act(async () => query([{ id: 3, url: 'https://www.google.com/maps/search/doctor' }]));
     expect(mock.ports[1].postMessage).toHaveBeenCalledExactlyOnceWith({ kind: 'stop' });
     expect(mock.ports[1].disconnect).toHaveBeenCalledTimes(1);
+  } finally { await act(async () => root.unmount()); }
+});
+
+it('keeps the native panel busy through reset until startup is acknowledged or rejected', async () => {
+  (setupBackground as unknown as () => void)();
+  const { window, document } = parseHTML('<html><body><div id="root"></div></body></html>');
+  vi.stubGlobal('window', window);
+  vi.stubGlobal('document', document);
+  vi.stubGlobal('location', { protocol: 'chrome-extension:' });
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  const root = createRoot(document.getElementById('root')!);
+  try {
+    await act(async () => root.render(<MapsComparison />));
+    const select = document.querySelector('select')!;
+    Object.defineProperty(select, 'value', { configurable: true, writable: true, value: '100' });
+    await act(async () => select.dispatchEvent(new window.Event('change', { bubbles: true })));
+    const enable = document.querySelector<HTMLButtonElement>('.maps-actions .primary')!;
+    const stop = document.querySelectorAll<HTMLButtonElement>('.maps-actions button')[1]!;
+
+    await act(async () => { enable.click(); for (let i = 0; i < 8; i++) await Promise.resolve(); });
+    expect(mock.ports[0].postMessage).toHaveBeenCalledWith(expect.objectContaining({ kind: 'start' }));
+    expect(enable.textContent).toBe('Connecting…');
+    expect(enable.getAttribute('aria-busy')).toBe('true');
+    expect(enable.disabled).toBe(true);
+    expect(stop.disabled).toBe(false);
+
+    await act(async () => { mock.runtime.connect({ name: 'careunfold:results' }); });
+    expect(enable.getAttribute('aria-busy')).toBe('false');
+    expect(enable.disabled).toBe(true);
+    expect(stop.disabled).toBe(false);
+    expect(document.querySelector('.maps-status')?.textContent).toContain('Watching already-loaded results');
+
+    await act(async () => stop.click());
+    let rejectInjection!: (error: Error) => void;
+    mock.scripting.executeScript.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectInjection = reject; }));
+    await act(async () => { enable.click(); for (let i = 0; i < 8; i++) await Promise.resolve(); });
+    expect(enable.getAttribute('aria-busy')).toBe('true');
+    expect(stop.disabled).toBe(false);
+    await act(async () => { rejectInjection(new Error('Synthetic injection failure.')); for (let i = 0; i < 8; i++) await Promise.resolve(); });
+    expect(enable.getAttribute('aria-busy')).toBe('false');
+    expect(stop.disabled).toBe(true);
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain('Synthetic injection failure.');
   } finally { await act(async () => root.unmount()); }
 });

@@ -33,10 +33,10 @@ export default defineBackground(() => {
     if (sourceStartupTimer !== undefined) clearTimeout(sourceStartupTimer);
     sourceStartupTimer = undefined;
   };
-  const stop = (message: string) => {
+  const resetSession = (reason: string) => {
     clearSourceStartupTimer();
     generation++;
-    controller?.abort(new Error(message));
+    controller?.abort(new Error(reason));
     controller = null;
     const old = source;
     source = null;
@@ -47,6 +47,9 @@ export default defineBackground(() => {
     visibleTest = false;
     signature = '';
     completed.clear();
+  };
+  const stop = (message: string) => {
+    resetSession(message);
     send({ kind: 'stopped', message });
   };
   const schedule = (places: MapsPlace[]) => {
@@ -116,7 +119,7 @@ export default defineBackground(() => {
         if (!Number.isSafeInteger(message.sourceTabId) || message.sourceTabId < 0 || !Number.isSafeInteger(message.limit) || message.limit < 1) {
           send({ kind: 'problem', message: 'Choose a source tab and an explicit review limit.' }); return;
         }
-        stop('Starting a new Maps session.');
+        resetSession('Starting a new Maps session.');
         sourceId = message.sourceTabId;
         limit = message.limit;
         diagnostics = message.diagnostics === true;

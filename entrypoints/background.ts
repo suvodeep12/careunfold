@@ -20,7 +20,13 @@ export default defineBackground(() => {
   let controller: AbortController | null = null;
   let running: Promise<void> = Promise.resolve();
   let completed = new Set<string>();
-  const send = (message: unknown) => { try { panel?.postMessage(message); } catch { /* Disconnected panels receive nothing. */ } };
+  const send = (message: any) => {
+    if (import.meta.env.DEV && panel?.name === 'careunfold:dev-panel') {
+      if (message.kind === 'review') message = { kind: 'diagnostics', event: 'review', row: diagnosticReview(message.place, message.capture, message.error, message.capturedAt) };
+      else if (message.kind === 'listings') message = { kind: 'diagnostics', event: 'listings', places: message.places.map(diagnosticPlace), keepKeys: message.keepKeys };
+    }
+    try { panel?.postMessage(message); } catch { /* Disconnected panels receive nothing. */ }
+  };
   const mirror = (message: DiagnosticEvent) => { if (diagnostics) { try { source?.postMessage(message); } catch { /* Disconnect clears the mirror. */ } } };
   const stop = (message: string) => {
     generation++;
@@ -81,10 +87,19 @@ export default defineBackground(() => {
   };
   browser.runtime.onConnect.addListener(port => {
     if (port.sender?.id !== browser.runtime.id) { port.disconnect(); return; }
-    if (port.name === 'careunfold:panel' && !port.sender.tab && port.sender.url === browser.runtime.getURL('/sidepanel.html')) {
+    const devPanel = import.meta.env.DEV && port.name === 'careunfold:dev-panel' && port.sender.frameId === 0 && port.sender.tab?.id !== undefined && port.sender.url === 'http://127.0.0.1:3000/careunfold-test';
+    if (devPanel || (port.name === 'careunfold:panel' && !port.sender.tab && port.sender.url === browser.runtime.getURL('/sidepanel.html'))) {
       if (panel && panel !== port) { port.postMessage({ kind: 'problem', message: 'Another CareUnfold panel owns the current session.' }); port.disconnect(); return; }
       panel = port;
       port.onMessage.addListener(message => {
+        if (devPanel && message?.kind === 'sources') {
+          void (async () => {
+            const allowed = await browser.permissions.contains({ origins: MAPS_SITES });
+            const tabs = allowed ? await browser.tabs.query({}) : [];
+            send({ kind: 'sources', allowed, tabs: tabs.filter(tab => isMapsPage(tab.url ?? '')).map(tab => ({ id: tab.id, title: tab.title ?? 'Google Maps' })) });
+          })().catch(() => send({ kind: 'problem', message: 'Could not discover Maps tabs. Refresh sources to retry.' }));
+          return;
+        }
         if (message?.kind === 'stop') { stop('Stopped by you.'); return; }
         if (message?.kind !== 'start') return;
         if (!Number.isSafeInteger(message.sourceTabId) || message.sourceTabId < 0 || !Number.isSafeInteger(message.limit) || message.limit < 1) {

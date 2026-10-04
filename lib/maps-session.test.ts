@@ -66,6 +66,28 @@ function port(name: string, sender: object) {
   return p;
 }
 
+it('hands a native development panel session to the local console without native controls', async () => {
+  (setupBackground as unknown as () => void)();
+  const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });
+  mock.runtime.onConnect.fire(panel);
+  panel.onMessage.fire({ kind: 'start', sourceTabId: 3, limit: 100 });
+  await flush();
+  const source = port('careunfold:results', { frameId: 0, tab: { id: 3 }, url: 'https://www.google.com/maps/search/doctor' });
+  mock.runtime.onConnect.fire(source);
+  const console = port('careunfold:dev-panel', { frameId: 0, tab: { id: 9 }, url: 'http://127.0.0.1:3000/careunfold-test' });
+  mock.runtime.onConnect.fire(console);
+  expect(panel.disconnect).toHaveBeenCalledOnce();
+  expect(source.disconnect).toHaveBeenCalledOnce();
+  expect(console.disconnect).not.toHaveBeenCalled();
+  console.onMessage.fire({ kind: 'sources' });
+  await flush();
+  expect(console.postMessage).toHaveBeenCalledWith(expect.objectContaining({ kind: 'sources', allowed: true }));
+  const competing = port('careunfold:dev-panel', { frameId: 0, tab: { id: 10 }, url: 'http://127.0.0.1:3000/careunfold-test' });
+  mock.runtime.onConnect.fire(competing);
+  expect(competing.disconnect).toHaveBeenCalledOnce();
+  console.disconnect();
+});
+
 it('requires site access and explicit limits, watches changes and clears the session on disconnect', async () => {
   (setupBackground as unknown as () => void)();
   const panel = port('careunfold:panel', { url: 'chrome-extension://test/sidepanel.html' });

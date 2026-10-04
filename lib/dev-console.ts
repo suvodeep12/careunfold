@@ -19,7 +19,7 @@ export function mountDevConsole(ctx: ContentScriptContext, runtime: typeof brows
     <label><input id="resume" type="checkbox"> Rerun this test after development reloads</label></fieldset>
     <div class="actions"><button class="primary" id="run" disabled>Run test</button><button id="stop" disabled>Stop</button><button id="refresh">Refresh sources</button></div>
     <p class="status" role="status" id="status">Connecting to the development extension…</p>
-    <p><small>Settings stay in this tab only. Reviews are never saved or uploaded. Close this tab or press Stop to end collection. Existing side-panel sessions must be stopped first.</small></p>`;
+    <p><small>Settings stay in this tab only. Reviews are never saved or uploaded. Close this tab or press Stop to end collection. It takes control from the side panel automatically.</small></p>`;
     document.body.append(host);
     const source = root.querySelector<HTMLSelectElement>('#source')!;
     const limit = root.querySelector<HTMLSelectElement>('#limit')!;
@@ -98,6 +98,9 @@ export function mountDevConsole(ctx: ContentScriptContext, runtime: typeof brows
     ctx.addEventListener(refresh, 'click', () => { if (!active) { if (connected) port.postMessage({ kind: 'sources' }); else connect(); } });
     ctx.addEventListener(source, 'change', () => { save(); idle(); });
     for (const control of [limit, visible, resume]) ctx.addEventListener(control, 'change', save);
-    ctx.onInvalidated(() => { port?.disconnect(); host.remove(); view.dispose(); });
+    ctx.onInvalidated(() => {
+      try { port?.disconnect(); } catch { /* Chrome can invalidate the port before cleanup runs. */ }
+      host.remove(); view.dispose();
+    });
     connect();
 }

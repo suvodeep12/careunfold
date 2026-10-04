@@ -14,8 +14,9 @@ it('resumes only opted-in settings, keeps startup busy and clears reruns on Stop
   vi.stubGlobal('sessionStorage', { getItem: (key: string) => values.get(key), setItem: (key: string, value: string) => values.set(key, value) });
   vi.stubGlobal('Option', function(text: string, value: string) { const option = document.createElement('option'); option.textContent = text; option.value = value; return option; });
   let receive: (message: any) => void = () => {};
+  let invalidate: () => void = () => {};
   const port = { onMessage: { addListener: (fn: typeof receive) => { receive = fn; } }, onDisconnect: { addListener() {} }, postMessage: vi.fn(), disconnect: vi.fn() };
-  mountDevConsole({ isInvalid: false, addEventListener: (target: EventTarget, event: string, fn: EventListener) => target.addEventListener(event, fn), onInvalidated() {} } as any,
+  mountDevConsole({ isInvalid: false, addEventListener: (target: EventTarget, event: string, fn: EventListener) => target.addEventListener(event, fn), onInvalidated(fn: () => void) { invalidate = fn; } } as any,
     { id: 'test', getManifest: () => ({ version: 'synthetic' }), connect: () => port } as any);
   receive({ kind: 'sources', allowed: true, tabs: [{ id: 3, title: 'Invented search' }] });
   expect(port.postMessage).toHaveBeenCalledWith({ kind: 'start', sourceTabId: 3, limit: 100, visibleTest: false });
@@ -30,4 +31,8 @@ it('resumes only opted-in settings, keeps startup busy and clears reruns on Stop
   expect(port.postMessage).toHaveBeenCalledWith({ kind: 'stop' });
   receive({ kind: 'stopped', message: 'Stopped by you.' });
   expect(root.querySelector<HTMLButtonElement>('#refresh')!.disabled).toBe(false);
+  port.disconnect.mockImplementation(() => { throw new Error('Extension context invalidated.'); });
+  expect(invalidate).not.toThrow();
+  expect(document.querySelector('main')).toBeNull();
+  expect(document.getElementById('careunfold-diagnostics')).toBeNull();
 });

@@ -4,7 +4,8 @@ import { mountDevConsole } from '../lib/dev-console';
 
 // Omitted from every packaged build by wxt.config.ts.
 export default defineContentScript({
-  matches: ['http://127.0.0.1:3000/careunfold-test'],
+  // Match patterns cannot contain ports; the runtime guard still requires port 3000.
+  matches: ['http://127.0.0.1/careunfold-test'],
   main(ctx) {
     if (import.meta.env.DEV && location.href === 'http://127.0.0.1:3000/careunfold-test') mountDevConsole(ctx, browser.runtime);
   },

@@ -10,7 +10,7 @@ export function mountDevConsole(ctx: ContentScriptContext, runtime: typeof brows
       :host{display:block;max-width:880px;margin:40px auto;padding:0 20px;color:#172b45;font:16px/1.6 "Segoe UI",sans-serif}
       *{box-sizing:border-box}h1{line-height:1.2;margin:0}small{color:#43556d}label{display:block;margin:18px 0 6px}select,button{font:inherit;padding:10px 14px;border:1px solid #bdcadb;border-radius:6px;background:white;color:#172b45}select{width:100%}button{cursor:pointer}button:disabled{cursor:default;opacity:.55}button.primary{background:#154fba;color:white;border-color:#154fba}:focus-visible{outline:3px solid #154fba;outline-offset:3px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}input{accent-color:#154fba}p{margin:12px 0}.status{background:#edf3ff;padding:14px;border-radius:6px}fieldset{border:0;padding:0;margin:0}fieldset label{margin:12px 0}
     </style>
-    
+
     <h1>CareUnfold test console</h1><p><small>Development extension ${runtime.getManifest().version}</small></p>
     <p>Choose an open Maps search. This page controls the installed development extension and shows aggregate results only.</p>
     <label for="source">Maps source tab</label><select id="source"><option value="">Discovering open Maps tabs…</option></select>

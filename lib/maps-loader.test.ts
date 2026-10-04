@@ -4,13 +4,63 @@ import { collectMapsReviews, parseMapsCapture } from './maps-loader';
 
 const url = 'https://www.google.com/maps/place/Invented/data=!1s0x1:0x2';
 function page() {
-  const { document } = parseHTML(`<html><body><div role="main"><button role="tab" aria-label="Reviews for Invented" aria-selected="true"></button><button aria-label="Sort reviews"></button><div role="menu"><div role="menuitemradio">Newest</div></div></div><div aria-live="polite"></div></body></html>`);
+  const { document } = parseHTML(`<html><body><div role="main"><button role="tab" aria-label="Reviews for Invented" aria-selected="true"></button><button aria-label="Sort reviews"></button><div role="menu"><div role="menuitemradio" aria-checked="true">Newest</div></div></div><div aria-live="polite"></div></body></html>`);
   document.querySelector('[role="menuitemradio"]')!.addEventListener('click', () => {
     document.querySelector('[aria-live]')!.textContent = 'The reviews are now sorted from newest to oldest.';
   });
   return document;
 }
 const card = (id: string) => `<div class="jftiEf" data-review-id="${id}"><span class="kvMYJc" role="img" aria-label="5 stars"></span><div class="MyEned"><span class="wiI7pd">Invented review for loader testing.</span></div></div>`;
+
+it('does not capture prior-sort cards while the announcement precedes their replacement', async () => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    doc.querySelector('[role="menuitemradio"]')!.setAttribute('aria-checked', 'false');
+    const list = doc.createElement('div');
+    list.innerHTML = card('old-a') + card('old-b');
+    doc.querySelector('[role="main"]')!.append(list);
+    doc.querySelector('[role="menuitemradio"]')!.addEventListener('click', () => {
+      setTimeout(() => { list.innerHTML = card('new-a') + card('new-b'); }, 500);
+    });
+    const capture = collectMapsReviews(doc, () => url, '0x1:0x2', 2, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(await capture).toMatchObject({ sort: 'newest-confirmed', stopped: 'limit', reviews: [{ id: 'new-a' }, { id: 'new-b' }] });
+  } finally { vi.useRealTimers(); }
+});
+
+it('returns no sample when a changed sort is announced but its old cards remain', async () => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    doc.querySelector('[role="menuitemradio"]')!.setAttribute('aria-checked', 'false');
+    doc.querySelector('[role="main"]')!.insertAdjacentHTML('beforeend', card('old'));
+    const capture = collectMapsReviews(doc, () => url, '0x1:0x2', 1, new AbortController().signal);
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(await capture).toMatchObject({ reviews: [], sort: 'unknown', stopped: 'unsupported', problem: 'The review list did not refresh after Newest was selected within 5 seconds.' });
+  } finally { vi.useRealTimers(); }
+});
+
+it.each(['cancel', 'navigate'])('preserves %s while waiting for the sorted list to refresh', async action => {
+  vi.useFakeTimers();
+  try {
+    const doc = page();
+    doc.querySelector('[role="menuitemradio"]')!.setAttribute('aria-checked', 'false');
+    doc.querySelector('[role="main"]')!.insertAdjacentHTML('beforeend', card('old'));
+    let current = url;
+    const controller = new AbortController();
+    const capture = collectMapsReviews(doc, () => current, '0x1:0x2', 1, controller.signal);
+    if (action === 'cancel') {
+      const rejected = expect(capture).rejects.toThrow('Stop during sorting');
+      controller.abort(new Error('Stop during sorting'));
+      await rejected;
+    } else {
+      current = 'https://www.google.com/maps/place/Other/data=!1s0x3:0x4';
+      await vi.advanceTimersByTimeAsync(250);
+      expect(await capture).toMatchObject({ reviews: [], sort: 'unknown', stopped: 'identity-changed' });
+    }
+  } finally { vi.useRealTimers(); }
+});
 
 it('validates capture messages and preserves unknown flags at the analysis boundary', () => {
   const review = { id: 'test', text: 'Invented review', rating: 4, translated: null, truncated: false, edited: null };

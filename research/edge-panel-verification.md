@@ -159,3 +159,18 @@ Using the authenticated development console on installed Edge 0.2.15, request 10
 - A development-only one-pixel scroll-boundary movement also stalled at 20. The diagnostic remained hidden/unfocused at 2026-10-04T10:35:11.510Z.
 
 All three experimental collector changes and temporary `[DEBUG-pagination]` instrumentation were removed. The doubtful assumption is that requesting a focused native window guarantees a visible, actively rendered Maps document in this connected-browser environment. It did not in these tests. The results narrow investigation toward visibility/activation/render scheduling; they do not establish complete review coverage, a reliable inactive-tab solution, or authenticity. Issue #1 remains open; its multi-listing production acceptance criteria are unmet. Next action: isolate which browser-attachment change permits pagination before changing production acquisition or proposing a foreground fallback.
+
+## Sort-transition contamination and corrected capture, 0.2.16
+
+Further installed development-only aggregate instrumentation at 2026-10-04T10:46:21.539Z established that the prior ten review IDs remained rendered immediately after the newest-sort announcement. The old collector captured all ten prior IDs plus ten replacement reviews, although the final ten-card DOM had zero prior-ID overlap. This explains the accumulated twenty-review sample; it is not evidence of successful pagination. No raw IDs, review text or author details were exported or committed. Earlier newest-confirmed observations above confirm the announcement, not sample sort purity, and remain provisional for that purpose.
+
+A separate window readout reported normal state, focused window and active tab while the actual document was hidden/unfocused. Thus native focus flags alone did not establish visible Maps rendering. All temporary window/sort instrumentation was removed. No window-state or pagination workaround ships.
+
+The production reader now records prior card nodes before selecting Newest and waits for their removal plus a nonempty replacement list after the announcement, within five seconds. If Newest is explicitly already selected, that replacement is unnecessary. A transition that cannot be confirmed returns no reviews, unknown sort and an unsupported diagnostic. If Maps reuses nodes in another layout, the barrier may conservatively decline capture. Existing cancellation and listing identity checks remain active.
+
+The delayed-replacement and never-replaced fixtures both failed before the barrier and pass afterward. Additional regressions exercise cancellation and navigation during the barrier. Installed Edge, same first loaded listing and selected 100-review limit:
+
+- Unattached capture at 2026-10-04T10:51:06.545Z: 10/1,977, newest-confirmed, stalled, 10 rendered cards, scroll 2065/2065; sample mean 5.00. A second unattached run at 10:54:43.556Z repeated this result.
+- Claiming the newly owned diagnostic page during startup reported visible document state and let the same corrected reader reach 100/1,977, newest-confirmed, limit, at 2026-10-04T10:56:25.772Z; sample mean 4.82. No manual scrolling was sent.
+
+The fixed sort contamination changes sample arithmetic without changing scoring. The attached result still does not establish why inactive rendering stalls, complete coverage, general multi-doctor reliability or review authenticity. Issue #15 addresses the sort error; issue #1 remains open for acquisition coverage. The user's search feed was not scrolled or navigated.

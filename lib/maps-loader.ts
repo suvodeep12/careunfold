@@ -88,6 +88,8 @@ export async function collectMapsReviews(
     if (!newest) await pause(250, signal);
   }
   if (!newest) return { ...result, stopped: 'unsupported', problem: 'The Newest sorting option did not appear within 5 seconds.' };
+  const alreadyNewest = newest.getAttribute('aria-checked') === 'true';
+  const priorCards = [...main.querySelectorAll('.jftiEf[data-review-id]')];
   newest.click();
   const confirmedBy = Date.now() + 5000;
   while (Date.now() < confirmedBy) {
@@ -99,6 +101,17 @@ export async function collectMapsReviews(
   }
   // A clicked control alone does not prove which sort produced the sample.
   if (result.sort === 'unknown') return { ...result, stopped: 'unsupported', problem: 'Newest sorting was not confirmed within 5 seconds.' };
+  // The announcement can precede replacement of the prior sort's review cards.
+  // Do not read or scroll those cards while the new list is still rendering.
+  if (!alreadyNewest) {
+    const refreshed = () => priorCards.every(card => !main.contains(card)) && !!main.querySelector('.jftiEf[data-review-id]');
+    const refreshBy = Date.now() + 5000;
+    while (!refreshed() && Date.now() < refreshBy) {
+      await pause(250, signal);
+      if (!samePlace() || !main.isConnected || tab.getAttribute('aria-selected') !== 'true') return { ...result, sort: 'unknown', stopped: 'identity-changed' };
+    }
+    if (!refreshed()) return { ...result, sort: 'unknown', stopped: 'unsupported', problem: 'The review list did not refresh after Newest was selected within 5 seconds.' };
+  }
 
   const reviews = new Map<string, MapsReview>();
   const stopBy = Date.now() + 90_000;

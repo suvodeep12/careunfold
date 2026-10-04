@@ -17,6 +17,7 @@ export default defineBackground(() => {
   let visibleTest = false;
   let signature = '';
   let generation = 0;
+  let sourceStartupTimer: ReturnType<typeof setTimeout> | undefined;
   let controller: AbortController | null = null;
   let running: Promise<void> = Promise.resolve();
   let completed = new Set<string>();
@@ -28,7 +29,12 @@ export default defineBackground(() => {
     try { panel?.postMessage(message); } catch { /* Disconnected panels receive nothing. */ }
   };
   const mirror = (message: DiagnosticEvent) => { if (diagnostics) { try { source?.postMessage(message); } catch { /* Disconnect clears the mirror. */ } } };
+  const clearSourceStartupTimer = () => {
+    if (sourceStartupTimer !== undefined) clearTimeout(sourceStartupTimer);
+    sourceStartupTimer = undefined;
+  };
   const stop = (message: string) => {
+    clearSourceStartupTimer();
     generation++;
     controller?.abort(new Error(message));
     controller = null;
@@ -116,9 +122,15 @@ export default defineBackground(() => {
         diagnostics = message.diagnostics === true;
         visibleTest = message.visibleTest === true;
         const version = generation;
+        sourceStartupTimer = setTimeout(() => {
+          if (version !== generation) return;
+          stop('Maps source did not respond within 20 seconds.');
+          send({ kind: 'problem', message: 'Maps source did not respond within 20 seconds. Refresh the source tab and try again.' });
+        }, 20_000);
         void (async () => {
           try {
             if (!await browser.permissions.contains({ origins: MAPS_SITES })) throw new Error('Google Maps site access is not enabled.');
+            if (version !== generation) return;
             const tab = await browser.tabs.get(message.sourceTabId);
             if (!isMapsPage(tab.url ?? '')) throw new Error('Open a Google Maps search in the source tab.');
             if (version !== generation) return;
@@ -137,7 +149,11 @@ export default defineBackground(() => {
       old?.disconnect();
       port.onMessage.addListener(message => {
         if (source !== port || message?.kind !== 'listings') return;
-        try { schedule(parseLoadedPlaces(message.places)); }
+        try {
+          const places = parseLoadedPlaces(message.places);
+          clearSourceStartupTimer();
+          schedule(places);
+        }
         catch (error) { stop(error instanceof Error ? error.message : 'Unsupported Maps results.'); }
       });
       port.onDisconnect.addListener(() => { if (source === port) stop('The Maps page disconnected. Start a new session to reconnect.'); });

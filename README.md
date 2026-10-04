@@ -30,14 +30,27 @@ Open `chrome://extensions` or `edge://extensions`, enable Developer mode, choose
 To update an existing unpacked installation:
 
 1. If you loaded `.output/chrome-mv3` from this project, run `npm run zip` to rebuild that folder. If you loaded an extracted ZIP instead, copy the new ZIP's contents into the same folder you originally loaded.
-2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build (currently 0.2.13).
+2. On the browser's extensions page, choose **Reload** for CareUnfold and confirm the displayed version matches the new build.
 3. Open a Maps search, reopen CareUnfold, select a review depth and choose **Enable on this Maps tab**. Previous in-memory samples are not preserved through the reload.
 
 For a collection retest, report the extension version, listing name, captured/listed counts and stop reason. Do not send patient review text or private account details. A partial sample or a selected 100-newest sample does not establish a full-listing true rating.
 
 For browser-accessible testing, stop any existing session, check **Show testing diagnostics on Maps**, then enable the session. Expand **CareUnfold testing diagnostics** at the bottom-right of the source Maps page. It shows aggregate counts, original/filtered sample calculations and sorting/stop diagnostics; the filtered calculation always represents the exclusion rules enabled. It includes no review text or author details. The opt-in mirror is visible to Maps page scripts, uses no storage or server, and disappears on session disconnect.
 
-`npm run dev` starts WXT without launching a browser. Load `.output/chrome-mv3-dev` manually for extension development. To preview production UI without installing the extension, serve `.output/chrome-mv3` locally and open `sidepanel.html`. This preview does not test extension installation or the toolbar action.
+## Development without repeated ZIP installs
+
+Use the stable WXT development folder, rather than release ZIPs. No additional software or paid service is needed.
+
+1. Start `npm run dev`. It binds only to `127.0.0.1:3000` and fails clearly if that port is occupied. The development server must remain running; the coding agent can restart it when development resumes.
+2. Once, disable the old packaged CareUnfold installation and load `.output/chrome-mv3-dev` through Edge's **Load unpacked** control. Keep the browser automation connection enabled. Developer builds use WXT's automatic rebuild/reload support.
+3. Once, open the development extension side panel on Maps, choose a review depth and enable Maps site access. Stop that session and close the side panel so the local console can own the next session.
+4. Open [the local test console](http://127.0.0.1:3000/careunfold-test), refresh sources, select the intended Maps search and review limit, optionally enable **Rerun this test after development reloads**, and run. The agent can operate these page controls and inspect aggregate results directly.
+
+The console remembers only selected tab, limit and test switches in that tab's session storage, separately for each extension ID. No review data is saved. Stop disables automatic reruns; closing the console ends its owned collection session. Missing source tabs, revoked site access and competing side panels require correcting that prerequisite before retrying. A disconnected extension reconnects while its script context remains valid; WXT replaces invalidated content scripts after development reloads. Browser restarts, disconnection of the automation connector and browser security prompts can still require user action. Installed Edge automatic-reload verification remains pending; synthetic tests do not establish it.
+
+For interface checks without installation, [the synthetic console preview](http://127.0.0.1:3000/careunfold-preview) uses the same UI with an invented fixture and no browser-extension access. Production builds exclude the console entrypoint, localhost access and development control port; `npm run zip` checks these boundaries in CI. Release ZIPs remain the distribution route, not the development loop.
+
+To preview production UI without installing the extension, serve `.output/chrome-mv3` locally and open `sidepanel.html`. This preview does not test extension installation or the toolbar action.
 
 ## Import format
 
